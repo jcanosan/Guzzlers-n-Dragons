@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - USDA_API_KEY=${USDA_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-true}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-guzzlers-n-dragons}
+      - DATABASE_URL=sqlite:///data/ingredients.db
+      - CHROMA_PERSIST_DIR=/app/data/chroma
+    volumes:
+      - ../data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Run tests in container
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ["pytest", "-v", "--cov=src", "--cov-report=term-missing"]
+    environment:
+      - USDA_API_KEY=${USDA_API_KEY}
+    volumes:
+      - ../data:/app/data
+    depends_on:
+      - app
+    profiles:
+      - testing
