@@ -8,7 +8,7 @@ AI recipe alchemist transforming fictional ingredients into cookable recipes wit
 
 ### Phase 1: Foundation & Data Layer (Days 1-2)
 
-- [ ] Project scaffolding: pyproject, config, logging, Docker
+- [x] Project scaffolding: pyproject, config, logging, Docker
 - [ ] Build fictional ingredient DB: 30+ ingredients across 3 themes
   - High Fantasy: lembas, miruvor, cram, honey-cakes, elven wine
   - Sci-Fi: spice melange, romulan ale, synthehol, gagh, blue milk
