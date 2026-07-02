@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Seed common real ingredients for substitution mapping."""
+"""Seed common real ingredients for substitution mapping.
+
+Note: the contents in this file have been AI generated. While they have been
+human-reviewed, it may contain mistakes."""
 
 from src.schemas.domain import RealIngredient
 from src.services.database import init_db, seed_real_ingredients

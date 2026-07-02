@@ -23,6 +23,9 @@ Base = declarative_base()
 
 
 class FictionalIngredientORM(Base):
+    """Object-Relational Mapping (ORM) model for fictional ingredients from
+    game/movie universes."""
+
     __tablename__ = "fictional_ingredients"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -44,6 +47,8 @@ class FictionalIngredientORM(Base):
 
 
 class RealIngredientORM(Base):
+    """ORM model for real-world ingredients with optional USDA FDC link."""
+
     __tablename__ = "real_ingredients"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -58,6 +63,8 @@ class RealIngredientORM(Base):
 
 
 class RecipePatternORM(Base):
+    """ORM model for parameterized recipe templates keyed by meal type."""
+
     __tablename__ = "recipe_patterns"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -73,6 +80,7 @@ SessionLocal: sessionmaker[Session] | None = None
 
 
 def init_db() -> None:
+    """Create engine, session factory, and all tables."""
     global engine, SessionLocal
     engine = create_engine(settings.database_url, echo=settings.debug)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -81,6 +89,7 @@ def init_db() -> None:
 
 
 def get_session() -> Session:
+    """Get a SQLAlchemy session. If none exists initialize the DB."""
     if SessionLocal is None:
         init_db()
 
@@ -91,6 +100,7 @@ def get_session() -> Session:
 
 
 def get_ingredient_by_name(name: str) -> FictionalIngredient | None:
+    """Fetch a single fictional ingredient by name. Returns None if missing."""
     db = get_session()
     try:
         orm = (
@@ -119,6 +129,7 @@ def get_ingredient_by_name(name: str) -> FictionalIngredient | None:
 def list_ingredients(
     thematic_group: str | None = None,
 ) -> list[FictionalIngredient]:
+    """List all fictional ingredients, optionally filtered by thematic group."""
     db = get_session()
     try:
         query = db.query(FictionalIngredientORM)
@@ -147,6 +158,7 @@ def list_ingredients(
 
 
 def seed_fictional_ingredients(ingredients: list[FictionalIngredient]) -> int:
+    """Insert fictional ingredients, skip duplicates. Returns new row count."""
     db = get_session()
     count = 0
     try:
@@ -182,6 +194,7 @@ def seed_fictional_ingredients(ingredients: list[FictionalIngredient]) -> int:
 
 
 def seed_real_ingredients(ingredients: list[RealIngredient]) -> int:
+    """Insert real ingredients, skip duplicates. Returns new row count."""
     db = get_session()
     count = 0
     try:
@@ -212,6 +225,7 @@ def seed_real_ingredients(ingredients: list[RealIngredient]) -> int:
 
 
 def seed_recipe_patterns(patterns: list[RecipePattern]) -> int:
+    """Insert recipe patterns, skip duplicates. Returns new row count."""
     db = get_session()
     count = 0
     try:

@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class Constraints(BaseModel):
+    """User-provided limits and parameters for recipe generation."""
+
     servings: int = Field(default=4, ge=1, le=50)
     max_prep_time_minutes: int = Field(default=60, ge=5, le=480)
     dietary: list[str] = Field(default_factory=list)
@@ -11,6 +13,8 @@ class Constraints(BaseModel):
 
 
 class AlchemyRequest(BaseModel):
+    """Request payload for the recipe-alchemy endpoint."""
+
     fictional_ingredient: str = Field(..., min_length=1, max_length=100)
     meal_type: str = Field(..., min_length=1, max_length=50)
     thematic_group: str = Field(

@@ -14,6 +14,7 @@ _client: ChromaClient | None = None
 
 
 def init_vector_store() -> None:
+    """Initialize the Chroma vector store with Ollama embeddings."""
     global _vector_store, _client
     _client = chromadb.PersistentClient(
         path=settings.chroma_persist_dir,
@@ -32,6 +33,7 @@ def init_vector_store() -> None:
 
 
 def get_vector_store() -> Chroma:
+    """Get the Chroma vector store, initializing if needed."""
     if _vector_store is None:
         init_vector_store()
 
