@@ -9,11 +9,11 @@ AI recipe alchemist transforming fictional ingredients into cookable recipes wit
 ### Phase 1: Foundation & Data Layer (Days 1-2)
 
 - [x] Project scaffolding: pyproject, config, logging, Docker
-- [ ] Build fictional ingredient DB: 30+ ingredients across 3 themes
-  - High Fantasy: lembas, miruvor, cram, honey-cakes, elven wine
-  - Sci-Fi: spice melange, romulan ale, synthehol, gagh, blue milk
-  - Mythological: ambrosia, nectar, soma, golden apples, mead of poetry
-- [ ] Seed real ingredient substitutions (USDA subset)
+- [x] Build generic fictional ingredient DB: 15 ingredients across 3 themes
+  - High Fantasy
+  - Sci-Fi
+  - Mythological
+- [x] Seed real ingredient substitutions
 
 ### Phase 2: RAG Pipeline (Days 3-4)
 
