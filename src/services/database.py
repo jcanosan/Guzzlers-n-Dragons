@@ -1,7 +1,14 @@
 import structlog
-from sqlalchemy import JSON, Column, Integer, String, Text, create_engine
+from sqlalchemy import JSON, Integer, String, Text, create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import (
+    Mapped,
+    Session,
+    declarative_base,
+    mapped_column,
+    sessionmaker,
+)
 
 from src.config.settings import settings
 from src.schemas.domain import (
@@ -18,39 +25,51 @@ Base = declarative_base()
 class FictionalIngredientORM(Base):
     __tablename__ = "fictional_ingredients"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), unique=True, nullable=False, index=True)
-    description = Column(Text)
-    thematic_group = Column(String(30), nullable=False, index=True)
-    taste_profile = Column(JSON, default={})
-    texture = Column(String(50))
-    rarity = Column(String(20), default="common")
-    magical_properties = Column(Text, default="")
-    preparation_notes = Column(Text, default="")
-    real_world_approximations = Column(JSON, default=[])
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False, index=True
+    )
+    description: Mapped[str | None] = mapped_column(Text, default=None)
+    thematic_group: Mapped[str] = mapped_column(
+        String(30), nullable=False, index=True
+    )
+    taste_profile: Mapped[dict] = mapped_column(JSON, default={})
+    texture: Mapped[str | None] = mapped_column(String(50), default=None)
+    rarity: Mapped[str] = mapped_column(String(20), default="common")
+    magical_properties: Mapped[str | None] = mapped_column(Text, default="")
+    preparation_notes: Mapped[str | None] = mapped_column(Text, default="")
+    real_world_approximations: Mapped[list[dict]] = mapped_column(
+        JSON, default=[]
+    )
 
 
 class RealIngredientORM(Base):
     __tablename__ = "real_ingredients"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), unique=True, nullable=False, index=True)
-    usda_fdc_id = Column(Integer, unique=True, nullable=True)
-    category = Column(String(50), default="")
-    nutrition_per_100g = Column(JSON, default={})
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False, index=True
+    )
+    usda_fdc_id: Mapped[int | None] = mapped_column(
+        Integer, unique=True, nullable=True
+    )
+    category: Mapped[str] = mapped_column(String(50), default="")
+    nutrition_per_100g: Mapped[dict] = mapped_column(JSON, default={})
 
 
 class RecipePatternORM(Base):
     __tablename__ = "recipe_patterns"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    meal_type = Column(String(50), nullable=False, index=True)
-    pattern_json = Column(JSON, nullable=False)
-    example_ingredients = Column(JSON, default=[])
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    meal_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )
+    pattern_json: Mapped[dict] = mapped_column(JSON, nullable=False)
+    example_ingredients: Mapped[list[str]] = mapped_column(JSON, default=[])
 
 
-engine = None
-SessionLocal = None
+engine: Engine | None = None
+SessionLocal: sessionmaker[Session] | None = None
 
 
 def init_db() -> None:
@@ -64,7 +83,11 @@ def init_db() -> None:
 def get_session() -> Session:
     if SessionLocal is None:
         init_db()
-    return SessionLocal()
+
+    factory = SessionLocal
+    if factory is None:
+        raise RuntimeError("Database failed to initialize")
+    return factory()
 
 
 def get_ingredient_by_name(name: str) -> FictionalIngredient | None:
@@ -79,13 +102,13 @@ def get_ingredient_by_name(name: str) -> FictionalIngredient | None:
             return FictionalIngredient(
                 id=orm.id,
                 name=orm.name,
-                description=orm.description,
+                description=orm.description or "",
                 thematic_group=orm.thematic_group,
                 taste_profile=orm.taste_profile or {},
-                texture=orm.texture,
+                texture=orm.texture or "",
                 rarity=orm.rarity,
-                magical_properties=orm.magical_properties,
-                preparation_notes=orm.preparation_notes,
+                magical_properties=orm.magical_properties or "",
+                preparation_notes=orm.preparation_notes or "",
                 real_world_approximations=orm.real_world_approximations or [],
             )
         return None
@@ -108,13 +131,13 @@ def list_ingredients(
             FictionalIngredient(
                 id=orm.id,
                 name=orm.name,
-                description=orm.description,
+                description=orm.description or "",
                 thematic_group=orm.thematic_group,
                 taste_profile=orm.taste_profile or {},
-                texture=orm.texture,
+                texture=orm.texture or "",
                 rarity=orm.rarity,
-                magical_properties=orm.magical_properties,
-                preparation_notes=orm.preparation_notes,
+                magical_properties=orm.magical_properties or "",
+                preparation_notes=orm.preparation_notes or "",
                 real_world_approximations=orm.real_world_approximations or [],
             )
             for orm in orms

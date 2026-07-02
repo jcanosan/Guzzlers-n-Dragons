@@ -1,5 +1,6 @@
 import chromadb
 import structlog
+from chromadb.api import ClientAPI as ChromaClient
 from chromadb.config import Settings as ChromaSettings
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
@@ -8,8 +9,8 @@ from src.config.settings import settings
 
 logger = structlog.get_logger()
 
-_vector_store = None
-_client = None
+_vector_store: Chroma | None = None
+_client: ChromaClient | None = None
 
 
 def init_vector_store() -> None:
@@ -33,7 +34,11 @@ def init_vector_store() -> None:
 def get_vector_store() -> Chroma:
     if _vector_store is None:
         init_vector_store()
-    return _vector_store
+
+    store = _vector_store
+    if store is None:
+        raise RuntimeError("Vector store failed to initialize")
+    return store
 
 
 def add_documents(documents: list[dict]) -> list[str]:
