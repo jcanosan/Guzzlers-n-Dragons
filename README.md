@@ -29,7 +29,7 @@ Ingredients  Science    USDA + TheMealDB
 ## Design docs
 
 - [Roadmap](ROADMAP.md) - 12-day development plan
-- [Technical Design](TECHNICAL_DESIGN.md) - Architecture, data flow, API contracts
+- [Technical Design](TECHNICAL_DESIGN.md) - Detailed architecture, data flow and API contracts
 
 ## Quick Start
 
@@ -102,7 +102,7 @@ uv run pytest -v
 uv run ruff check src/
 
 # Type check
-uv run mypy src/
+uv run ty src/
 
 # Format
 uv run ruff format src/
