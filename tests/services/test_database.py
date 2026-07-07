@@ -7,19 +7,12 @@ from src.schemas.domain import (
 )
 from src.services import database as db
 
-
-def _init_test_db(monkeypatch):
-    monkeypatch.setattr(db.settings, "database_url", "sqlite://")
-    db.init_db()
-
-
 _MINIMAL_ING: dict[str, Any] = {
     "description": "",
     "thematic_group": "fantasy",
     "texture": "",
     "rarity": "common",
 }
-
 
 _SHARED_ARGS: dict[str, Any] = {
     "description": "",
@@ -29,34 +22,31 @@ _SHARED_ARGS: dict[str, Any] = {
 
 
 class TestGetIngredientByName:
-    def test_not_found(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_not_found(self):
         result = db.get_ingredient_by_name("nonexistent")
         assert result is None
 
-    def test_found(self, monkeypatch):
-        _init_test_db(monkeypatch)
-        ing = FictionalIngredient(name="test_item", **_MINIMAL_ING)
-        db.seed_fictional_ingredients([ing])
+    def test_found(self):
+        ingredient = FictionalIngredient(name="test_item", **_MINIMAL_ING)
+        db.seed_fictional_ingredients([ingredient])
 
         result = db.get_ingredient_by_name("test_item")
         assert result is not None
         assert result.name == "test_item"
 
-    def test_null_fields(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_null_fields(self):
         from src.services.database import FictionalIngredientORM
 
-        sess = db.get_session()
+        session = db.get_session()
         orm = FictionalIngredientORM(
             name="null_item",
             description=None,
             thematic_group="fantasy",
             texture=None,
         )
-        sess.add(orm)
-        sess.commit()
-        sess.close()
+        session.add(orm)
+        session.commit()
+        session.close()
 
         result = db.get_ingredient_by_name("null_item")
         assert result is not None
@@ -65,13 +55,11 @@ class TestGetIngredientByName:
 
 
 class TestListIngredients:
-    def test_empty(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_empty(self):
         results = db.list_ingredients()
         assert results == []
 
-    def test_all(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_all(self):
         db.seed_fictional_ingredients(
             [
                 FictionalIngredient(name="a", **_MINIMAL_ING),
@@ -81,8 +69,7 @@ class TestListIngredients:
         results = db.list_ingredients()
         assert len(results) == 2
 
-    def test_filter_by_group(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_filter_by_group(self):
         db.seed_fictional_ingredients(
             [
                 FictionalIngredient(name="a", **_MINIMAL_ING),
@@ -97,21 +84,18 @@ class TestListIngredients:
 
 
 class TestSeedFictionalIngredients:
-    def test_seed_new(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_new(self):
         ingredients = [FictionalIngredient(name="new_item", **_MINIMAL_ING)]
         count = db.seed_fictional_ingredients(ingredients)
         assert count == 1
 
-    def test_seed_duplicate(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_duplicate(self):
         ing = FictionalIngredient(name="dup", **_MINIMAL_ING)
         db.seed_fictional_ingredients([ing])
         count = db.seed_fictional_ingredients([ing])
         assert count == 0
 
-    def test_seed_multiple(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_multiple(self):
         ingredients = [
             FictionalIngredient(name="a", **_MINIMAL_ING),
             FictionalIngredient(name="b", **_MINIMAL_ING),
@@ -121,14 +105,12 @@ class TestSeedFictionalIngredients:
 
 
 class TestSeedRealIngredients:
-    def test_seed_new(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_new(self):
         ingredients = [RealIngredient(name="salt", usda_fdc_id=1)]
         count = db.seed_real_ingredients(ingredients)
         assert count == 1
 
-    def test_seed_duplicate(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_duplicate(self):
         ing = RealIngredient(name="salt", usda_fdc_id=1)
         db.seed_real_ingredients([ing])
         count = db.seed_real_ingredients([ing])
@@ -136,16 +118,14 @@ class TestSeedRealIngredients:
 
 
 class TestSeedRecipePatterns:
-    def test_seed_new(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_new(self):
         patterns = [
             RecipePattern(meal_type="test", pattern_json={"key": "val"})
         ]
         count = db.seed_recipe_patterns(patterns)
         assert count == 1
 
-    def test_seed_duplicate(self, monkeypatch):
-        _init_test_db(monkeypatch)
+    def test_seed_duplicate(self):
         pat = RecipePattern(meal_type="test", pattern_json={"key": "val"})
         db.seed_recipe_patterns([pat])
         count = db.seed_recipe_patterns([pat])

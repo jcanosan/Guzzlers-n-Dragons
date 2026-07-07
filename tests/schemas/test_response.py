@@ -40,35 +40,34 @@ class TestValidationIssue:
 
 class TestSubstitutionOption:
     def test_valid(self):
-        opt = SubstitutionOption(item="flour", reasoning="common thickener")
-        assert opt.item == "flour"
+        option = SubstitutionOption(item="flour", reasoning="common thickener")
+        assert option.item == "flour"
 
 
 class TestSubstitution:
     def test_valid(self):
-        sub = Substitution.model_validate(
+        substitution = Substitution.model_validate(
             {
                 "for": "butter",
                 "options": [{"item": "oil", "reasoning": "vegan option"}],
             }
         )
-        assert sub.for_ingredient == "butter"
-        assert len(sub.options) == 1
-        assert len(sub.options) == 1
+        assert substitution.for_ingredient == "butter"
+        assert len(substitution.options) == 1
 
 
 class TestNutritionEstimate:
     def test_defaults(self):
-        n = NutritionEstimate()
-        assert n.calories_per_serving is None
-        assert n.protein_g is None
-        assert n.notes == ""
+        nutrition = NutritionEstimate()
+        assert nutrition.calories_per_serving is None
+        assert nutrition.protein_g is None
+        assert nutrition.notes == ""
 
     def test_valid_full(self):
-        n = NutritionEstimate(
+        nutrition = NutritionEstimate(
             calories_per_serving=500, protein_g=20, carbs_g=60, fat_g=15
         )
-        assert n.calories_per_serving == 500
+        assert nutrition.calories_per_serving == 500
 
 
 class TestPlausibilityReport:

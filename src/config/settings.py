@@ -1,10 +1,16 @@
 from functools import lru_cache
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
+
     # API Keys
     usda_api_key: str | None = Field(default=None, alias="USDA_API_KEY")
     langsmith_api_key: str | None = Field(
@@ -40,11 +46,6 @@ class Settings(BaseSettings):
     embedding_model: str = Field(
         default="nomic-embed-text", alias="EMBEDDING_MODEL"
     )
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
 
 
 @lru_cache

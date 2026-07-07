@@ -33,13 +33,13 @@ class TestConstraints:
 
 class TestAlchemyRequest:
     def test_valid(self):
-        req = AlchemyRequest(
+        request = AlchemyRequest(
             fictional_ingredient="lembas",
             meal_type="bread",
             thematic_group="high_fantasy",
         )
-        assert req.fictional_ingredient == "lembas"
-        assert isinstance(req.constraints, Constraints)
+        assert request.fictional_ingredient == "lembas"
+        assert isinstance(request.constraints, Constraints)
 
     def test_missing_required(self):
         with pytest.raises(ValidationError):
