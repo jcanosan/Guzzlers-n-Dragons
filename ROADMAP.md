@@ -15,13 +15,13 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 
 ### Phase 2: RAG Pipeline
 
-- [] Setup ChromaDB, ingest cooking science docs
+- [x] Setup ChromaDB, ingest cooking science docs
   - Technique substitution guide
   - Flavor pairing science
   - Texture modification & food chemistry
-- [] Hybrid retriever (vector + keyword)
-- [] Tools: technique substitution, flavor pairing, texture modification
-- [] Tests: vector store add/search/stats, tool functions
+- [x] Hybrid retriever (vector + keyword)
+- [x] Tools: technique substitution, flavor pairing, texture modification
+- [x] Tests: vector store add/search/stats, tool functions
 
 ### Phase 3: MCP Integration
 

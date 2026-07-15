@@ -227,4 +227,5 @@ __marimo__/
 .langgraph_api/
 
 data/ingredients.db
+data/chroma/
 .tokensave

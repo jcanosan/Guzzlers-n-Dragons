@@ -26,6 +26,19 @@ if __name__ == "__main__":
         "seed_recipe_patterns.py",
     ]
 
+    # Cooking science ingestion (vector store)
+    print(f"\n{'=' * 60}")
+    print("Running ingest_cooking_science.py...")
+    print(f"{'=' * 60}")
+    ingest_result = subprocess.run(
+        [sys.executable, "scripts/ingest_cooking_science.py"],
+        capture_output=False,
+    )
+    if ingest_result.returncode != 0:
+        print("FAILED: ingest_cooking_science.py")
+        sys.exit(1)
+    print("SUCCESS: ingest_cooking_science.py")
+
     all_success = True
     for script in scripts:
         if not run_script(script):
