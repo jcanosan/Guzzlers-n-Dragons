@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.routes import router as alchemy_router
 from src.config.logging import configure_logging
 from src.services.database import init_db
-from src.services.vector_store import init_vector_store
+from src.services.vector_store import vector_store
 
 configure_logging()
 
@@ -18,7 +18,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI):
     logger.info("starting_application")
     init_db()
-    init_vector_store()
+    vector_store.init()
     yield
     logger.info("shutting_down_application")
 
