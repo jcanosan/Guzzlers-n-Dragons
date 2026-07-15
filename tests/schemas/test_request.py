@@ -43,7 +43,7 @@ class TestAlchemyRequest:
 
     def test_missing_required(self):
         with pytest.raises(ValidationError):
-            AlchemyRequest(fictional_ingredient="lembas")
+            AlchemyRequest(fictional_ingredient="lembas")  # type: ignore
 
     def test_invalid_thematic_group(self):
         with pytest.raises(ValidationError):
