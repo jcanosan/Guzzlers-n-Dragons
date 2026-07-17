@@ -5,7 +5,7 @@ AI recipe alchemist that transforms fictional ingredients (e.g. from books, game
 ## Highlights
 
 - **Multi-agent orchestration** (LangGraph): Planner → Creator → Critic with validation loop
-- **Knowledge fusion**: SQL (structured lore) + RAG (cooking science) + MCP (live data)
+- **Knowledge fusion**: SQL (structured lore) + RAG (cooking science) + External APIs (live data)
 - **Constraint-aware generation**: Dietary, time, equipment, thematic consistency
 - **Production patterns**: Async FastAPI, Pydantic validation, Docker, CI/CD, observability
 
@@ -22,7 +22,7 @@ FastAPI → LangGraph (Planner → Creator → Critic)
                 ↓
     ┌───────────┼───────────┐
     ▼           ▼           ▼
-   SQL        RAG         MCP
+    SQL        RAG        API
 Ingredients  Science    USDA + TheMealDB
 ```
 

@@ -9,7 +9,7 @@
 - **Runtime**: Python 3.14 (via `uv`)
 - **LLM/Embeddings**: Ollama (`gemma4:31b-cloud` chat, `nomic-embed-text` embeddings)
 - **Orchestration**: LangGraph (Planner $\to$ Creator $\to$ Critic)
-- **Data**: SQLite (Structured Lore) + ChromaDB (Cooking Science RAG) + MCP (USDA/TheMealDB)
+- **Data**: SQLite (Structured Lore) + ChromaDB (Cooking Science RAG) + External APIs (USDA/TheMealDB)
 - **API**: FastAPI
 
 ## Developer Commands
@@ -26,7 +26,7 @@
 - **Knowledge Access**: 
   - SQL $\to$ Lore & Ingredient profiles.
   - RAG $\to$ Culinary techniques & food science.
-  - MCP $\to$ External nutrition & real-world recipe patterns.
+  - External APIs $\to$ Nutrition & real-world recipe patterns.
 - **Plausibility**: `Critic` validate against `thematic_group` (high_fantasy, sci_fi, mythological). Prevent anachronisms (e.g., no potatoes in high fantasy).
 
 ## Constraints & Conventions

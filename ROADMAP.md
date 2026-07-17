@@ -23,12 +23,13 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 - [x] Tools: technique substitution, flavor pairing, texture modification
 - [x] Tests: vector store add/search/stats, tool functions
 
-### Phase 3: MCP Integration
+### Phase 3: External API Integration (Day 5)
 
-- [ ] USDA FoodData Central MCP client (nutrition, allergens)
-- [ ] Custom TheMealDB wrapper (recipe pattern extraction)
-- [ ] Tools: get nutrition, find patterns by ingredient, common techniques
-- [ ] Tests: MCP client mock/unit
+- [x] USDA FoodData Central API client (httpx, async)
+- [x] TheMealDB API client (httpx, async)
+- [x] Agent tools via LangChain @tool decorator (agent-discoverable, schema-validated)
+- [x] Tools: nutrition lookup, recipe pattern extraction, technique aggregation
+- [x] Tests: API client mock/unit + agent tool integration tests
 
 ### Phase 4: Agent System
 
@@ -51,7 +52,7 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 ## Milestones
 
 - **M1** (Day 2): Ingredient DB operational, basic API skeleton
-- **M2** (Day 5): Full knowledge pipeline (SQL + RAG + MCP) working
+- **M2** (Day 5): Full knowledge pipeline (SQL + RAG + External APIs) working
 - **M3** (Day 8): Agent loop functional end-to-end
 - **M4** (Day 10): API complete, validated outputs
 - **M5** (Day 12): Deployed, documented, demo-ready

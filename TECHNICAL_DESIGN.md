@@ -25,7 +25,7 @@
               ┌────────────────┼────────────────┐
               ▼                ▼                ▼
        ┌────────────┐  ┌────────────┐  ┌────────────┐
-       │   SQL      │  │   RAG      │  │   MCP      │
+       │   SQL      │  │   RAG      │  │   API      │
        │  Tools     │  │  Tools     │  │  Tools     │
        └────────────┘  └────────────┘  └────────────┘
 ```
@@ -40,13 +40,13 @@
    - Determines knowledge needs for Creator
 3. **Creator Phase**:
    - Retrieves cooking science from RAG (technique, pairing, substitution)
-   - Fetches real-world patterns from MCP (TheMealDB)
+   - Fetches real-world patterns from external APIs (TheMealDB)
    - Generates novel recipe using LLM + structured knowledge
    - Produces draft recipe + initial plausibility notes
 4. **Critic Phase**:
    - Validates thematic consistency (anachronism check, tech level)
    - Verifies cookability (clear steps, reasonable times/temps)
-   - Checks nutrition sanity via USDA MCP
+   - Checks nutrition sanity via USDA API
    - Validates magical/extraordinary claims have lore justification
    - Outputs: Final recipe + detailed plausibility report
 5. **Response**: Structured JSON with recipe, substitutions, nutrition, validation notes
@@ -63,7 +63,7 @@
 
 - **Input**: PlannerResult + retrieved knowledge
 - **Output**: DraftRecipe (ingredients, instructions, description, plausibility_notes)
-- **Tools**: RAG retriever (technique, pairing, substitution), MCP pattern extractor
+- **Tools**: RAG retriever (technique, pairing, substitution), API pattern extractor
 
 ### Critic Agent
 
@@ -115,13 +115,33 @@ CREATE TABLE recipe_patterns (
 - **Embedding**: `nomic-embed-text`
 - **Metadata**: `source`, `category`, `technique_type`, `difficulty`
 
-### MCP Integration
+### External API Integration
+
+Currently, each external data source (USDA, Fineli, Open Food Facts, TheMealDB)
+is accessed via a plain `httpx` async client. Agent-facing tools are declared
+with LangChain's `@tool` decorator — same semantics as MCP (name, description,
+structured schema), but without the MCP wire protocol.
 
 - **USDA FoodData Central**: Nutrition lookup, allergen data
 - **TheMealDB Wrapper**:
   - Normalizes API responses to pattern format
   - Extracts: techniques by ingredient, common pairings, meal type distributions
   - Caches locally to reduce API calls
+
+#### Future: Standalone MCP servers
+
+Each data source will become its own MCP server in a separate repository:
+
+```
+usda-mcp-server/       ← stdio JSON-RPC server wrapping USDA REST API
+fineli-mcp-server/     ← stdio JSON-RPC server wrapping Fineli REST API
+off-mcp-server/        ← stdio JSON-RPC server wrapping Open Food Facts API
+```
+
+This project will then load them via `langchain-mcp-adapters.load_mcp_tools()`
+instead of importing the HTTP clients directly. The `nutrition.py` orchestration
+layer and `agent_tools.py` @tool wrappers survive unchanged — only the transport
+layer swaps.
 
 ## Validation System
 
@@ -211,22 +231,23 @@ THEMATIC_CONSTRAINTS = {
 
 ## Tech Stack Justification
 
-| Layer         | Choice                  | Rationale                                       |
-| ------------- | ----------------------- | ----------------------------------------------- |
-| API           | FastAPI                 | Async, auto-docs, type-safe, production-ready   |
-| Orchestration | LangGraph               | Explicit state graph, supports validation loops |
-| LLM           | TBD                     | Cost/quality balance for creative generation    |
-| SQL           | SQLite + SQLAlchemy     | Zero-config, portable, ACID                     |
-| Vector DB     | ChromaDB                | Local, persistent, good LangChain integration   |
-| MCP           | USDA + Custom TheMealDB | Live nutrition + real recipe patterns           |
-| Validation    | Pydantic + custom       | Type-safe at boundaries, domain logic separate  |
-| Deploy        | Railway (Docker)        | Free tier, GitHub CI/CD, auto-deploy            |
-| Observability | LangSmith               | Trace agent reasoning for demos                 |
+| Layer         | Choice              | Rationale                                       |
+| ------------- | ------------------- | ----------------------------------------------- |
+| API           | FastAPI             | Async, auto-docs, type-safe, production-ready   |
+| Orchestration | LangGraph           | Explicit state graph, supports validation loops |
+| LLM           | TBD                 | Cost/quality balance for creative generation    |
+| SQL           | SQLite + SQLAlchemy | Zero-config, portable, ACID                     |
+| Vector DB     | ChromaDB            | Local, persistent, good LangChain integration   |
+| External APIs | USDA + TheMealDB    | Live nutrition + real recipe patterns           |
+| Validation    | Pydantic + custom   | Type-safe at boundaries, domain logic separate  |
+| Deploy        | Railway (Docker)    | Free tier, GitHub CI/CD, auto-deploy            |
+| Observability | LangSmith           | Trace agent reasoning for demos                 |
 
 ## Extensibility Points
 
 1. **New Themes**: Add entry to `THEMATIC_CONSTRAINTS` + seed ingredients
-2. **New Knowledge Sources**: Implement Tool interface, register in agent
+2. **New Knowledge Sources**: Package as an API clients as MCP servers in their
+   own repos, then load via `langchain-mcp-adapters.load_mcp_tools()`.
 3. **New Meal Types**: Add pattern to `recipe_patterns` table
 4. **Output Formats**: Add formatter in `output_tools.py` (PDF, HTML, etc.)
 5. **Validation Rules**: Extend Critic with new checker classes
