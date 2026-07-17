@@ -8,6 +8,14 @@ from src.services.vector_store import vector_store
 
 @pytest.fixture
 def test_store(monkeypatch):
+    """ChromaDB vector store initialized in temp directory.
+
+    Opt-in per test (not autouse) because:
+    - ChromaDB init is time-expensive (~2s per test)
+    - Only tests exercising add/search/init need it
+    - TestCollectionStats.test_before_init intentionally runs
+      without initialization to verify graceful fallback
+    """
     tmpdir = tempfile.mkdtemp()
     monkeypatch.setattr(settings, "chroma_persist_dir", tmpdir)
     vector_store.init()
