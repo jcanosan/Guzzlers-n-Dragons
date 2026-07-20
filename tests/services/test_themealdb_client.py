@@ -36,7 +36,7 @@ class TestExtractTechniques:
             "Boil the pasta. Then sauté the garlic in olive oil."
         )
         assert "boil" in result
-        assert "sauté" in result
+        assert "saute" in result  # ASCII-normalized
 
     def test_empty(self):
         result = extract_techniques("")
@@ -49,6 +49,14 @@ class TestExtractTechniques:
     def test_duplicates_removed(self):
         result = extract_techniques("boil water, boil again, then bake")
         assert result == ["bake", "boil"]
+
+
+class TestExtractTechniquesWordBoundary:
+    def test_frying_does_not_match_fry(self):
+        # 'fry' wouldn't match 'frying' - whole word only
+        result = extract_techniques("heat the frying oil and then bake")
+        assert "fry" not in result
+        assert "bake" in result
 
 
 class TestExtractIngredientPairs:

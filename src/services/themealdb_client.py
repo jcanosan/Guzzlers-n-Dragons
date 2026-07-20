@@ -1,5 +1,8 @@
 """TheMealDB API client for pattern extraction from real recipes."""
 
+import re
+import unicodedata
+
 import httpx
 import structlog
 
@@ -7,28 +10,43 @@ logger = structlog.get_logger()
 
 MEALDB_BASE_URL = "https://www.themealdb.com/api/json/v1/1"
 
-# Known cooking techniques to extract from instructions
+
+def _ascii(text: str) -> str:
+    """NFKD-normalize and strip non-ASCII bytes (e.g. é -> e)."""
+    normalized = unicodedata.normalize("NFKD", text)
+    return normalized.encode("ASCII", "ignore").decode("ASCII")
+
+
+# Known cooking techniques to extract from instructions;
+# normalized to ASCII so 'sauté' -> 'saute' matches accented text
 _TECHNIQUES_KEYWORDS = {
-    "bake",
-    "boil",
-    "braise",
-    "broil",
-    "chop",
-    "dice",
-    "emulsify",
-    "ferment",
-    "fry",
-    "grill",
-    "marinate",
-    "mince",
-    "poach",
-    "roast",
-    "sauté",
-    "simmer",
-    "steam",
-    "stir-fry",
-    "whisk",
+    _ascii(t)
+    for t in [
+        "bake",
+        "boil",
+        "braise",
+        "broil",
+        "chop",
+        "dice",
+        "emulsify",
+        "ferment",
+        "fry",
+        "grill",
+        "marinate",
+        "mince",
+        "poach",
+        "roast",
+        "sauté",
+        "simmer",
+        "steam",
+        "stir-fry",
+        "whisk",
+    ]
 }
+# Compile a regex that matches each technique as a whole word
+_TECHNIQUES_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(t) for t in _TECHNIQUES_KEYWORDS) + r")\b"
+)
 
 
 async def search_meals(ingredient: str) -> list[dict]:
@@ -79,16 +97,16 @@ async def get_meal_details(meal_id: str) -> dict | None:
 
 
 def extract_techniques(instructions: str | None) -> list[str]:
-    """Extract cooking techniques from recipe instructions."""
+    """Extract cooking techniques from recipe instructions.
+
+    Normalizes accents (sauté -> saute) and matches whole words
+    so 'fry' doesn't match 'frying'.
+    """
     if not instructions:
         return []
 
-    text_lower = instructions.lower()
-    found = {
-        technique
-        for technique in _TECHNIQUES_KEYWORDS
-        if technique in text_lower
-    }
+    text_ascii = _ascii(instructions).lower()
+    found = set(_TECHNIQUES_PATTERN.findall(text_ascii))
     return sorted(found)
 
 
