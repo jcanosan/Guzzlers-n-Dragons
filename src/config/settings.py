@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", alias="HOST")
     port: int = Field(default=8000, alias="PORT")
     debug: bool = Field(default=False, alias="DEBUG")
+    cors_origins: list[str] = Field(
+        default=["http://localhost:5173"], alias="CORS_ORIGINS"
+    )
 
     # LLM
     llm_model: str = Field(default="ollama:gemma4:31b-cloud", alias="LLM_MODEL")

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import router as alchemy_router
 from src.config.logging import configure_logging
+from src.config.settings import settings
 from src.services.database import init_db
 from src.services.vector_store import vector_store
 
@@ -35,10 +36,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
