@@ -10,7 +10,15 @@ from src.services.vector_store import vector_store
 def chunk_text(
     text: str, chunk_size: int = 1000, overlap: int = 200
 ) -> list[str]:
-    """Split text into overlapping chunks."""
+    """Split text into overlapping chunks.
+
+    Raises:
+        ValueError: If overlap >= chunk_size (would loop forever).
+    """
+    if overlap >= chunk_size:
+        raise ValueError(
+            f"overlap ({overlap}) must be < chunk_size ({chunk_size})"
+        )
 
     chunks = []
     start = 0
