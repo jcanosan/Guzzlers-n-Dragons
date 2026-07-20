@@ -112,6 +112,7 @@ async def _try_seed_nutrition(ingredient_name: str) -> dict | None:
         "protein_g": None,
         "carbs_g": None,
         "fat_g": None,
+        "fiber_g": None,
         "source": "approximation",
         "approximations": fictional.real_world_approximations,
     }
@@ -123,5 +124,6 @@ def _unavailable_result() -> dict:
         "protein_g": None,
         "carbs_g": None,
         "fat_g": None,
+        "fiber_g": None,
         "source": "unavailable",
     }
