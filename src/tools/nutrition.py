@@ -1,5 +1,7 @@
 """Nutrition lookup chain: USDA → Fineli → Open Food Facts → DB."""
 
+from typing import NotRequired, TypedDict
+
 import structlog
 
 from src.services.database import get_ingredient_by_name
@@ -11,7 +13,19 @@ from src.services.usda_client import get_nutrition, search_food
 logger = structlog.get_logger()
 
 
-async def lookup_nutrition(ingredient_name: str) -> dict:
+class NutritionResult(TypedDict):
+    """Contract for all nutrition lookup return values."""
+
+    calories_per_serving: float | None
+    protein_g: float | None
+    carbs_g: float | None
+    fat_g: float | None
+    fiber_g: float | None
+    source: str
+    approximations: NotRequired[list[dict]]
+
+
+async def lookup_nutrition(ingredient_name: str) -> NutritionResult:
     """Look up nutrition data, chaining USDA → Fineli → Open Food Facts → DB."""
     usda = await _try_usda_nutrition(ingredient_name)
     if usda:
@@ -33,7 +47,7 @@ async def lookup_nutrition(ingredient_name: str) -> dict:
     return _unavailable_result()
 
 
-async def _try_usda_nutrition(ingredient_name: str) -> dict | None:
+async def _try_usda_nutrition(ingredient_name: str) -> NutritionResult | None:
     foods = await search_food(ingredient_name)
     if not foods:
         logger.info("usda_no_match", ingredient=ingredient_name)
@@ -60,7 +74,7 @@ async def _try_usda_nutrition(ingredient_name: str) -> dict | None:
     }
 
 
-async def _try_fineli_nutrition(ingredient_name: str) -> dict | None:
+async def _try_fineli_nutrition(ingredient_name: str) -> NutritionResult | None:
     foods = await fineli_search_food(ingredient_name)
     if not foods:
         return None
@@ -84,7 +98,7 @@ async def _try_fineli_nutrition(ingredient_name: str) -> dict | None:
     }
 
 
-async def _try_off_nutrition(ingredient_name: str) -> dict | None:
+async def _try_off_nutrition(ingredient_name: str) -> NutritionResult | None:
     nutrients = await get_first_nutrition(ingredient_name)
     if not nutrients:
         return None
@@ -100,7 +114,7 @@ async def _try_off_nutrition(ingredient_name: str) -> dict | None:
     }
 
 
-async def _try_seed_nutrition(ingredient_name: str) -> dict | None:
+async def _try_seed_nutrition(ingredient_name: str) -> NutritionResult | None:
     fictional = get_ingredient_by_name(ingredient_name)
     if not fictional or not fictional.real_world_approximations:
         logger.info("seed_no_match", ingredient=ingredient_name)
@@ -118,7 +132,7 @@ async def _try_seed_nutrition(ingredient_name: str) -> dict | None:
     }
 
 
-def _unavailable_result() -> dict:
+def _unavailable_result() -> NutritionResult:
     return {
         "calories_per_serving": None,
         "protein_g": None,

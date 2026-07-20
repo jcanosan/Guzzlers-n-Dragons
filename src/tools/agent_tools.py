@@ -13,12 +13,12 @@ based on the task description.
 from langchain_core.tools import tool
 
 from src.services.themealdb_client import find_recipe_patterns
-from src.tools.nutrition import lookup_nutrition
+from src.tools.nutrition import NutritionResult, lookup_nutrition
 from src.tools.validation import validate_ingredient
 
 
 @tool
-async def lookup_ingredient_nutrition(ingredient_name: str) -> dict:
+async def lookup_ingredient_nutrition(ingredient_name: str) -> NutritionResult:
     """Look up nutrition data for an ingredient with multi-source fallback.
 
     Tries USDA first, then Fineli (EU government data), then Open Food Facts,
