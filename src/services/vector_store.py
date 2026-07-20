@@ -1,3 +1,5 @@
+import hashlib
+
 import chromadb
 import structlog
 from chromadb.api import ClientAPI as ChromaClient
@@ -160,9 +162,9 @@ class VectorStore:
         return combined
 
     @staticmethod
-    def _content_key(content: str) -> int:
-        """Hash of first 100 chars, used for deduplication."""
-        return hash(content[:100])
+    def _content_key(content: str) -> str:
+        """Deterministic hash of first 100 chars, used for deduplication."""
+        return hashlib.sha256(content[:100].encode()).hexdigest()
 
     @staticmethod
     def _invert_distance(score: float) -> float:
