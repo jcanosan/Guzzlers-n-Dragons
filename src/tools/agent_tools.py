@@ -14,6 +14,7 @@ from langchain_core.tools import tool
 
 from src.services.themealdb_client import find_recipe_patterns
 from src.tools.nutrition import lookup_nutrition
+from src.tools.validation import validate_ingredient
 
 
 @tool
@@ -26,6 +27,7 @@ async def lookup_ingredient_nutrition(ingredient_name: str) -> dict:
     Args:
         ingredient_name: Name of the ingredient to look up
     """
+    ingredient_name = validate_ingredient(ingredient_name)
     return await lookup_nutrition(ingredient_name)
 
 
@@ -40,6 +42,7 @@ async def find_recipes_by_ingredient(ingredient: str) -> list[dict]:
     Args:
         ingredient: Ingredient name to search for (e.g., 'chicken', 'flour')
     """
+    ingredient = validate_ingredient(ingredient)
     return await find_recipe_patterns(ingredient)
 
 
@@ -53,6 +56,7 @@ async def get_common_cooking_techniques(ingredient: str) -> list[str]:
     Args:
         ingredient: Ingredient name to analyze
     """
+    ingredient = validate_ingredient(ingredient)
     patterns = await find_recipe_patterns(ingredient)
     techniques: set[str] = set()
     for pattern in patterns:
