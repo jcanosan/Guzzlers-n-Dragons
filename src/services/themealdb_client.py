@@ -46,11 +46,11 @@ async def search_meals(ingredient: str) -> list[dict]:
                 "themealdb_search", ingredient=ingredient, count=len(meals)
             )
             return meals
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, ValueError) as exc:
             logger.error(
                 "themealdb_search_failed",
                 ingredient=ingredient,
-                error=str(exc),
+                error_type=type(exc).__name__,
             )
             return []
 
@@ -69,11 +69,11 @@ async def get_meal_details(meal_id: str) -> dict | None:
             if meals:
                 return meals[0]
             return None
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, ValueError) as exc:
             logger.error(
                 "themealdb_details_failed",
                 meal_id=meal_id,
-                error=str(exc),
+                error_type=type(exc).__name__,
             )
             return None
 

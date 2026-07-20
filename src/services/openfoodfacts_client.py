@@ -33,8 +33,12 @@ async def search_food(query: str, page_size: int = 3) -> list[dict]:
             products = data.get("products", [])
             logger.info("off_search", query=query, result_count=len(products))
             return products
-        except httpx.HTTPError as exc:
-            logger.error("off_search_failed", query=query, error=str(exc))
+        except (httpx.HTTPError, ValueError) as exc:
+            logger.error(
+                "off_search_failed",
+                query=query,
+                error_type=type(exc).__name__,
+            )
             return []
 
 

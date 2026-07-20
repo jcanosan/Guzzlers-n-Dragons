@@ -27,8 +27,12 @@ async def search_food(query: str, page_size: int = 5) -> list[dict]:
             foods = response.json()
             logger.info("fineli_search", query=query, result_count=len(foods))
             return foods[:page_size]
-        except httpx.HTTPError as exc:
-            logger.error("fineli_search_failed", query=query, error=str(exc))
+        except (httpx.HTTPError, ValueError) as exc:
+            logger.error(
+                "fineli_search_failed",
+                query=query,
+                error_type=type(exc).__name__,
+            )
             return []
 
 
@@ -55,8 +59,10 @@ async def get_nutrition(food_id: int) -> dict | None:
             }
             logger.info("fineli_nutrition", food_id=food_id)
             return {k: v for k, v in nutrients.items() if v is not None}
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, ValueError) as exc:
             logger.error(
-                "fineli_nutrition_failed", food_id=food_id, error=str(exc)
+                "fineli_nutrition_failed",
+                food_id=food_id,
+                error_type=type(exc).__name__,
             )
             return None

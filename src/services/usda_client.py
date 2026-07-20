@@ -37,7 +37,11 @@ async def search_food(query: str, page_size: int = 5) -> list[dict]:
             logger.info("usda_search", query=query, result_count=len(foods))
             return foods
         except httpx.HTTPError as exc:
-            logger.error("usda_search_failed", query=query, error=str(exc))
+            logger.error(
+                "usda_search_failed",
+                query=query,
+                error_type=type(exc).__name__,
+            )
             return []
 
 
@@ -64,7 +68,11 @@ async def get_nutrition(fdc_id: int) -> dict | None:
             logger.info("usda_nutrition", fdc_id=fdc_id)
             return nutrients
         except httpx.HTTPError as exc:
-            logger.error("usda_nutrition_failed", fdc_id=fdc_id, error=str(exc))
+            logger.error(
+                "usda_nutrition_failed",
+                fdc_id=fdc_id,
+                error_type=type(exc).__name__,
+            )
             return None
 
 
