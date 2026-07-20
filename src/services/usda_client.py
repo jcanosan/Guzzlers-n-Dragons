@@ -24,7 +24,7 @@ async def search_food(query: str, page_size: int = 5) -> list[dict]:
         try:
             response = await client.post(
                 f"{USDA_BASE_URL}/foods/search",
-                params={"api_key": settings.usda_api_key},
+                headers={"X-Api-Key": settings.usda_api_key},
                 json={
                     "query": query,
                     "pageSize": page_size,
@@ -54,7 +54,7 @@ async def get_nutrition(fdc_id: int) -> dict | None:
         try:
             response = await client.get(
                 f"{USDA_BASE_URL}/food/{fdc_id}",
-                params={"api_key": settings.usda_api_key},
+                headers={"X-Api-Key": settings.usda_api_key},
             )
             response.raise_for_status()
             data = response.json()
