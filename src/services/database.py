@@ -82,7 +82,7 @@ SessionLocal: sessionmaker[Session] | None = None
 def init_db() -> None:
     """Create engine, session factory, and all tables."""
     global engine, SessionLocal
-    engine = create_engine(settings.database_url, echo=settings.debug)
+    engine = create_engine(settings.database_url, echo=settings.sql_echo)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base.metadata.create_all(bind=engine)
     logger.info("database_initialized", url=settings.database_url)
