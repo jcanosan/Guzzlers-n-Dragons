@@ -198,13 +198,22 @@ class VectorStore:
         """Get stats about the vector store."""
         if self._client is None:
             return {"collections": 0, "total_documents": 0}
-        collections = self._client.list_collections()
-        total = sum(c.count() for c in collections)
-        return {
-            "collections": len(collections),
-            "total_documents": total,
-            "collection_names": [c.name for c in collections],
-        }
+        try:
+            collections = self._client.list_collections()
+            total = sum(c.count() for c in collections)
+            return {
+                "collections": len(collections),
+                "total_documents": total,
+                "collection_names": [
+                    c.name if hasattr(c, "name") else str(c)
+                    for c in collections
+                ],
+            }
+        except AttributeError, TypeError:
+            logger.warning(
+                "chromadb_api_drift", reason="list_collections shape"
+            )
+            return {"collections": 0, "total_documents": 0}
 
     def reset(self) -> None:
         """Reset store and client. Useful for tests."""
