@@ -18,7 +18,7 @@
 - **Run App**: `uv run uvicorn src.main:app --reload`
 - **Lint**: `uv run ruff check .`
 - **Format**: `uv run ruff format .`
-- **Typecheck**: `uv run ty .`
+- **Typecheck**: `uv run ty check .`
 - **Test**: `uv run pytest -v`
 
 ## Architecture Nuances

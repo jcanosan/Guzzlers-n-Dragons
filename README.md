@@ -48,7 +48,7 @@ uv sync
 cp .env.example .env
 
 # Seed the DB with fictional ingredients, real ingredients, and recipe patterns
-uv run python scripts/run_seeds.py
+PYTHONPATH=. uv run python scripts/run_seeds.py
 
 # Run the API server
 uv run uvicorn src.main:app --reload
@@ -90,22 +90,6 @@ curl -X POST http://localhost:8000/alchemy/transform \
       "dietary": ["vegetarian"]
     }
   }'
-```
-
-## Development
-
-```bash
-# Run tests
-uv run pytest -v
-
-# Lint
-uv run ruff check src/
-
-# Type check
-uv run ty src/
-
-# Format
-uv run ruff format src/
 ```
 
 ## License
