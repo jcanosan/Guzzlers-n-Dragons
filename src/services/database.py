@@ -157,6 +157,27 @@ def list_ingredients(
         db.close()
 
 
+def get_pattern_by_meal_type(meal_type: str) -> RecipePattern | None:
+    """Look up a recipe pattern template by meal type."""
+    db = get_session()
+    try:
+        orm = (
+            db.query(RecipePatternORM)
+            .filter(RecipePatternORM.meal_type == meal_type)
+            .first()
+        )
+        if orm:
+            return RecipePattern(
+                id=orm.id,
+                meal_type=orm.meal_type,
+                pattern_json=orm.pattern_json,
+                example_ingredients=orm.example_ingredients or [],
+            )
+        return None
+    finally:
+        db.close()
+
+
 def seed_fictional_ingredients(ingredients: list[FictionalIngredient]) -> int:
     """Insert fictional ingredients, skip duplicates. Returns new row count."""
     db = get_session()
