@@ -33,10 +33,10 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 
 ### Phase 4: Agent System
 
-- [ ] Planner Agent. Constraint extraction, technique identification
-- [ ] Creator Agent. Recipe generation with knowledge fusion
-- [ ] Critic Agent. Validation (lore, science, cookability)
-- [ ] Tests: agent unit tests per agent
+- [x] Planner Agent. Constraint extraction, technique identification
+- [x] Creator Agent. Recipe generation with knowledge fusion
+- [x] Critic Agent. Validation (lore, science, cookability)
+- [x] Tests: agent unit tests per agent (6 tests, mocked LLM)
 
 ### Phase 5: Output & API
 

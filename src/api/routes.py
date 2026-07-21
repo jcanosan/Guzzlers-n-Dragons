@@ -1,22 +1,50 @@
 from fastapi import APIRouter, HTTPException, status
 
+from src.agents.graph import agent_graph
+from src.schemas.agents import AgentState
 from src.schemas.domain import FictionalIngredient
 from src.schemas.request import AlchemyRequest
-from src.schemas.response import AlchemyResult
+from src.schemas.response import AlchemyResult, PlausibilityReport, Recipe
 from src.services.database import get_ingredient_by_name, list_ingredients
 
 router = APIRouter()
 
 
 @router.post(
-    "/transform", response_model=AlchemyResult, status_code=status.HTTP_200_OK
+    "/transform",
+    response_model=AlchemyResult,
+    status_code=status.HTTP_200_OK,
 )
 async def transform_ingredient(request: AlchemyRequest):
-    """Transform a fictional ingredient into a plausible recipe."""
-    # TODO: Implement agent pipeline
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Agent pipeline not yet implemented",
+    """Transform a fictional ingredient into a plausible recipe.
+
+    Runs the Planner → Creator → Critic LangGraph pipeline
+    with up to 3 feedback-loop iterations.
+    """
+    initial_state = AgentState(request=request)
+    final_state = await agent_graph.ainvoke(initial_state)
+
+    report = PlausibilityReport(**(final_state["report"] or {}))
+    draft = final_state.get("draft_recipe")
+
+    recipe = Recipe(
+        name=draft.name if draft else "",
+        description=draft.description if draft else "",
+        ingredients=draft.ingredients if draft else [],
+        instructions=draft.instructions if draft else [],
+        prep_time_minutes=draft.prep_time_minutes if draft else 0,
+        cook_time_minutes=draft.cook_time_minutes if draft else 0,
+        servings=draft.servings if draft else 0,
+        difficulty=draft.difficulty if draft else "medium",
+    )
+
+    return AlchemyResult(
+        recipe=recipe,
+        plausibility_report=report,
+        metadata={
+            "iterations": final_state.get("iteration", 0) + 1,
+            "ingredient": request.fictional_ingredient,
+        },
     )
 
 
