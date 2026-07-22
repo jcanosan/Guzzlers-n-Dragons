@@ -40,9 +40,9 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 
 ### Phase 5: Output & API
 
-- [ ] Structured JSON output (recipe + plausibility report)
-- [ ] FastAPI endpoints, error handling, LangSmith tracing
-- [ ] Tests: API route integration tests
+- [x] Structured JSON output (recipe + plausibility report)
+- [x] FastAPI endpoints, error handling, LangSmith tracing
+- [x] Tests: API route integration tests
 
 ### Phase 6: Polish & Deploy
 
