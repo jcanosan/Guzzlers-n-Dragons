@@ -108,7 +108,10 @@ async def run_planner(state: AgentState) -> dict:
     """Execute the Planner agent node.
 
     Gathers context, calls the LLM, and returns PlannerResult.
+    Increments iteration so the Critic-to-Planner feedback loop
+    halts after MAX_ITERATIONS (defined in graph.py).
     """
+    iteration = state.iteration + 1
     ctx = _gather_context(state)
     user_prompt = _build_prompt(state, ctx)
     response = await call_llm(PLANNER_SYSTEM_PROMPT, user_prompt)
@@ -123,4 +126,5 @@ async def run_planner(state: AgentState) -> dict:
     return {
         "ingredient_profile": ctx["ingredient_profile"],
         "planner_result": planner_result,
+        "iteration": iteration,
     }

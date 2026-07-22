@@ -42,7 +42,7 @@ async def transform_ingredient(request: AlchemyRequest):
         recipe=recipe,
         plausibility_report=report,
         metadata={
-            "iterations": final_state.get("iteration", 0) + 1,
+            "iterations": final_state.get("iteration", 0),
             "ingredient": request.fictional_ingredient,
         },
     )
