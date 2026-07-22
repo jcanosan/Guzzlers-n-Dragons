@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     # LangSmith
-    langsmith_tracing: bool = Field(default=True, alias="LANGSMITH_TRACING")
+    langsmith_tracing: bool = Field(default=False, alias="LANGSMITH_TRACING")
     langsmith_project: str = Field(
         default="guzzlers-n-dragons", alias="LANGSMITH_PROJECT"
     )
