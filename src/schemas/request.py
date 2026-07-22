@@ -6,8 +6,8 @@ class Constraints(BaseModel):
 
     servings: int = Field(default=4, ge=1, le=50)
     max_prep_time_minutes: int = Field(default=60, ge=5, le=480)
-    dietary: list[str] = Field(default_factory=list)
-    equipment: list[str] = Field(default_factory=list)
+    dietary: list[str] = Field(default_factory=list, max_length=20)
+    equipment: list[str] = Field(default_factory=list, max_length=20)
     max_cook_time_minutes: int = Field(default=120, ge=0, le=720)
     difficulty: str | None = Field(default=None, pattern="^(easy|medium|hard)$")
 
