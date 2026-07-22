@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException, status
 
 from src.agents.graph import agent_graph
@@ -9,33 +11,33 @@ from src.services.database import get_ingredient_by_name, list_ingredients
 
 router = APIRouter()
 
+AGENT_TIMEOUT_SECONDS = 300
 
-@router.post(
-    "/transform",
-    response_model=AlchemyResult,
-    status_code=status.HTTP_200_OK,
-)
-async def transform_ingredient(request: AlchemyRequest):
-    """Transform a fictional ingredient into a plausible recipe.
 
-    Runs the Planner → Creator → Critic LangGraph pipeline
-    with up to 3 feedback-loop iterations.
+def _get(draft, key: str, default=None):
+    """Extract a value from a dict or object, falling back to default."""
+    if isinstance(draft, dict):
+        return draft.get(key, default)
+    return getattr(draft, key, default) if draft else default
+
+
+def _build_result(final_state: dict, request: AlchemyRequest) -> AlchemyResult:
+    """Build an AlchemyResult from the final graph state.
+
+    Degrades gracefully: empty report/draft if the state is partial.
     """
-    initial_state = AgentState(request=request)
-    final_state = await agent_graph.ainvoke(initial_state)
-
-    report = PlausibilityReport(**(final_state["report"] or {}))
+    report = PlausibilityReport(**(final_state.get("report", {}) or {}))
     draft = final_state.get("draft_recipe")
 
     recipe = Recipe(
-        name=draft.name if draft else "",
-        description=draft.description if draft else "",
-        ingredients=draft.ingredients if draft else [],
-        instructions=draft.instructions if draft else [],
-        prep_time_minutes=draft.prep_time_minutes if draft else 0,
-        cook_time_minutes=draft.cook_time_minutes if draft else 0,
-        servings=draft.servings if draft else 0,
-        difficulty=draft.difficulty if draft else "medium",
+        name=_get(draft, "name", ""),
+        description=_get(draft, "description", ""),
+        ingredients=_get(draft, "ingredients", []),
+        instructions=_get(draft, "instructions", []),
+        prep_time_minutes=_get(draft, "prep_time_minutes", 0),
+        cook_time_minutes=_get(draft, "cook_time_minutes", 0),
+        servings=_get(draft, "servings", 0),
+        difficulty=_get(draft, "difficulty", "medium"),
     )
 
     return AlchemyResult(
@@ -46,6 +48,39 @@ async def transform_ingredient(request: AlchemyRequest):
             "ingredient": request.fictional_ingredient,
         },
     )
+
+
+@router.post(
+    "/transform",
+    response_model=AlchemyResult,
+    status_code=status.HTTP_200_OK,
+)
+async def transform_ingredient(request: AlchemyRequest):
+    """Transform a fictional ingredient into a plausible recipe.
+
+    Runs the Planner -> Creator -> Critic LangGraph pipeline with up to
+    3 feedback-loop iterations. Degrades gracefully on partial output.
+    """
+    initial_state = AgentState(request=request)
+
+    try:
+        final_state = await asyncio.wait_for(
+            agent_graph.ainvoke(initial_state),
+            timeout=AGENT_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Agent pipeline timed out. The LLM or external API "
+            "may be unresponsive. Retry with a simpler ingredient.",
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Agent pipeline failed: {type(exc).__name__}",
+        ) from exc
+
+    return _build_result(final_state, request)
 
 
 @router.get("/ingredients", response_model=list[FictionalIngredient])
