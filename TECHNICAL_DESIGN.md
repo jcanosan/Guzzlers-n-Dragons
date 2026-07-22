@@ -243,6 +243,17 @@ THEMATIC_CONSTRAINTS = {
 | Deploy        | Railway (Docker)    | Free tier, GitHub CI/CD, auto-deploy            |
 | Observability | LangSmith           | Trace agent reasoning for demos                 |
 
+### CORS Configuration
+
+CORS is configured via the `CORS_ORIGINS` environment variable.
+
+- **Format**: JSON array of allowed origin strings.
+- **Default**: `["http://localhost:5173"]` (Vite dev server).
+- **Production**: Set to your deployed frontend URL(s), e.g.
+  `["https://app.example.com"]`.
+- **Security**: `allow_credentials=True` requires explicit origins — do NOT use
+  `["*"]` in production.
+
 ## Extensibility Points
 
 1. **New Themes**: Add entry to `THEMATIC_CONSTRAINTS` + seed ingredients
