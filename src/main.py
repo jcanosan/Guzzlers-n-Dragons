@@ -32,6 +32,8 @@ app = FastAPI(
     ),
     version="0.1.0",
     lifespan=lifespan,
+    docs_url="/docs" if settings.debug else None,
+    redoc_url="/redoc" if settings.debug else None,
 )
 
 app.add_middleware(
