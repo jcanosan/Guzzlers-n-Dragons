@@ -116,7 +116,14 @@ def _check_cookability(
 
 
 async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
-    """Look up nutrition data via the fallback chain (USDA → Fineli → OFF)."""
+    """Look up nutrition data via the fallback chain (USDA -> Fineli -> OFF)."""
+    from src.tools.validation import validate_ingredient
+
+    try:
+        ingredient_name = validate_ingredient(ingredient_name)
+    except ValueError:
+        return NutritionEstimate(notes="No real ingredients found for analysis")
+
     nut_query = ingredient_name.lower().replace(" ", "_")
     nut_result = await lookup_nutrition(nut_query)
 
