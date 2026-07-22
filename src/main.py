@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.api.routes import router as alchemy_router
 from src.config.logging import configure_logging
@@ -13,6 +14,27 @@ from src.services.vector_store import vector_store
 configure_logging()
 
 logger = structlog.get_logger()
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to every response.
+
+    HSTS left commented — uncomment only when TLS terminates in front
+    of the app (Cloudflare, Railway TLS proxy, etc.).
+    """
+
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
+        # response.headers["Strict-Transport-Security"] = (
+        #     "max-age=31536000; includeSubDomains"
+        # )
+        return response
 
 
 @asynccontextmanager
@@ -43,6 +65,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
 )
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 @app.get("/health")
