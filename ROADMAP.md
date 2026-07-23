@@ -46,7 +46,7 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 
 ### Phase 6: Polish & Deploy
 
-- [ ] Integration + e2e tests, CI/CD (GitHub Actions)
+- [x] Integration + e2e tests, CI/CD (GitHub Actions)
 - [ ] Railway deploy, demo recordings, architecture diagram, talking points
 
 ## Milestones
