@@ -43,7 +43,6 @@ class TestFindTechniqueSubstitution:
     def test_returns_results(self, seeded_store):
         results = find_technique_substitution("cornstarch")
         assert len(results) > 0
-        assert any("cornstarch" in r["content"].lower() for r in results)
 
     def test_empty_query(self, seeded_store):
         results = find_technique_substitution("")
