@@ -1,9 +1,11 @@
+import sys
 import tempfile
 
 import pytest
 
 from src.config.settings import settings
 from src.services.vector_store import vector_store
+from tests.mock_embeddings import MockEmbeddings
 
 
 @pytest.fixture
@@ -18,6 +20,11 @@ def test_store(monkeypatch):
     """
     tmpdir = tempfile.mkdtemp()
     monkeypatch.setattr(settings, "chroma_persist_dir", tmpdir)
+    monkeypatch.setattr(
+        sys.modules["src.services.vector_store"],
+        "OllamaEmbeddings",
+        MockEmbeddings,
+    )
     vector_store.init()
     yield
     vector_store.reset()
