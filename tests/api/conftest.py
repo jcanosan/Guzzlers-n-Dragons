@@ -18,16 +18,20 @@ def seed_test_db():
         db.init_db()
 
         session = db.get_session()
-        session.add_all([
-            db.FictionalIngredientORM(
-                name="lembas", description="Elven waybread",
-                thematic_group="high_fantasy", texture="cake",
-                rarity="rare",
-                real_world_approximations=[
-                    {"ingredient": "flour", "reasoning": "common"}
-                ],
-            ),
-        ])
+        session.add_all(
+            [
+                db.FictionalIngredientORM(
+                    name="lembas",
+                    description="Elven waybread",
+                    thematic_group="high_fantasy",
+                    texture="cake",
+                    rarity="rare",
+                    real_world_approximations=[
+                        {"ingredient": "flour", "reasoning": "common"}
+                    ],
+                ),
+            ]
+        )
         session.commit()
         session.close()
         yield
