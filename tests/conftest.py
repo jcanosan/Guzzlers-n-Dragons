@@ -1,6 +1,26 @@
 """Shared fixtures for tests."""
 
+import sys
+
 import pytest
+
+from tests.mock_embeddings import MockEmbeddings
+
+
+@pytest.fixture(autouse=True, scope="session")
+def mock_ollama_embeddings():
+    """Replace OllamaEmbeddings with all-zero vectors across all tests.
+
+    Prevents every test from needing a running Ollama instance for
+    embedding calls (nomic-embed-text). Applied once per session.
+    """
+    with pytest.MonkeyPatch.context() as m:
+        m.setattr(
+            sys.modules["src.services.vector_store"],
+            "OllamaEmbeddings",
+            MockEmbeddings,
+        )
+        yield
 
 
 @pytest.fixture
