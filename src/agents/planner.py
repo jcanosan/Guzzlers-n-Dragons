@@ -92,12 +92,25 @@ def _build_prompt(state: AgentState, ctx: dict) -> str:
     )
 
 
+def _strip_fences(content: str) -> str:
+    """Remove markdown code fences and json prefix from LLM output."""
+    text = content.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines)
+    return text
+
+
 def _parse_response(content: str) -> PlannerResult:
     """Parse the LLM response into a PlannerResult."""
     import json
 
     try:
-        data = json.loads(content)
+        data = json.loads(_strip_fences(content))
         return PlannerResult(**data)
     except (json.JSONDecodeError, ValueError) as exc:
         logger.warning("planner_parse_failed", error=str(exc))

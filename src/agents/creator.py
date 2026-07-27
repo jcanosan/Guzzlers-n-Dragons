@@ -127,15 +127,28 @@ def _build_prompt(
     )
 
 
+def _strip_fences(content: str) -> str:
+    """Remove markdown code fences from LLM output."""
+    text = content.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines)
+    return text
+
+
 def _parse_response(content: str) -> DraftRecipe:
     """Parse the LLM response into a DraftRecipe."""
     if not content or not content.strip():
         raise ValueError("LLM returned empty response")
 
     try:
-        data = json.loads(content)
+        data = json.loads(_strip_fences(content))
         return DraftRecipe(**data)
-    except (json.JSONDecodeError, ValueError):
+    except json.JSONDecodeError, ValueError:
         logger.error("creator_parse_failed", content_preview=content[:200])
         raise
 
