@@ -129,12 +129,15 @@ def _build_prompt(
 
 def _parse_response(content: str) -> DraftRecipe:
     """Parse the LLM response into a DraftRecipe."""
+    if not content or not content.strip():
+        raise ValueError("LLM returned empty response")
+
     try:
         data = json.loads(content)
         return DraftRecipe(**data)
-    except (json.JSONDecodeError, ValueError) as exc:
-        logger.warning("creator_parse_failed", error=str(exc))
-        return DraftRecipe()
+    except (json.JSONDecodeError, ValueError):
+        logger.error("creator_parse_failed", content_preview=content[:200])
+        raise
 
 
 async def run_creator(state: AgentState) -> dict:
