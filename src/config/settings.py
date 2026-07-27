@@ -12,19 +12,11 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # API Keys
     usda_api_key: str | None = Field(default=None, alias="USDA_API_KEY")
-    langsmith_api_key: str | None = Field(
-        default=None, alias="LANGSMITH_API_KEY"
-    )
-
-    # LangSmith
-    langsmith_tracing: bool = Field(default=False, alias="LANGSMITH_TRACING")
-    langsmith_project: str = Field(
-        default="guzzlers-n-dragons", alias="LANGSMITH_PROJECT"
-    )
 
     # Database
     database_url: str = Field(
@@ -37,8 +29,6 @@ class Settings(BaseSettings):
     )
 
     # App
-    host: str = Field(default="0.0.0.0", alias="HOST")
-    port: int = Field(default=8000, alias="PORT")
     debug: bool = Field(default=False, alias="DEBUG")
     sql_echo: bool = Field(default=False, alias="SQL_ECHO")
     cors_origins: list[str] = Field(
