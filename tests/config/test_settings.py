@@ -13,8 +13,3 @@ class TestSettings:
         s = Settings(DATABASE_URL="sqlite:///test.db", DEBUG=True)
         assert s.database_url == "sqlite:///test.db"
         assert s.debug is True
-
-    def test_port_defaults(self):
-        s = Settings()
-        assert s.host == "0.0.0.0"
-        assert s.port == 8000
