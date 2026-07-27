@@ -27,6 +27,7 @@ class VectorStore:
         )
         embeddings = OllamaEmbeddings(
             model=settings.embedding_model,
+            base_url="http://localhost:11434",
         )
         self._vector_store = Chroma(
             client=self._client,
