@@ -5,7 +5,7 @@ class TestSettings:
     def test_defaults(self):
         s = Settings()
         assert s.database_url == "sqlite:///data/ingredients.db"
-        assert s.debug is True
+        assert s.debug is False
         assert s.llm_model == "gemma4:31b-cloud"
         assert s.llm_temperature == 0.7
 
