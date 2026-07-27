@@ -14,6 +14,12 @@ def mock_ollama_embeddings():
     Prevents every test from needing a running Ollama instance for
     embedding calls (nomic-embed-text). Applied once per session.
     """
+    # Import if not already loaded (settings tests run before vector store)
+    if "src.services.vector_store" not in sys.modules:
+        import importlib
+
+        importlib.import_module("src.services.vector_store")
+
     with pytest.MonkeyPatch.context() as m:
         m.setattr(
             sys.modules["src.services.vector_store"],

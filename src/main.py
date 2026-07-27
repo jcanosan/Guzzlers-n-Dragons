@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 import structlog
@@ -39,7 +40,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("starting_application")
+    logger.info(
+        "starting_application",
+        ollama_host=os.environ.get("OLLAMA_HOST", "not set"),
+        ollama_key_set=bool(os.environ.get("OLLAMA_API_KEY")),
+    )
     init_db()
     vector_store.init()
     yield

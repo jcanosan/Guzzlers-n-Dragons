@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     )
 
     # LLM
-    llm_model: str = Field(default="ollama:gemma4:31b-cloud", alias="LLM_MODEL")
+    llm_model: str = Field(default="gemma4:31b-cloud", alias="LLM_MODEL")
     llm_temperature: float = Field(default=0.7, alias="LLM_TEMPERATURE")
 
     # Embeddings
