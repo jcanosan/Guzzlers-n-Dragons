@@ -254,6 +254,42 @@ CORS is configured via the `CORS_ORIGINS` environment variable.
 - **Security**: `allow_credentials=True` requires explicit origins — do NOT use
   `["*"]` in production.
 
+## Deployment
+
+### Railway
+
+The project includes a `docker/Dockerfile` that Railway auto-detects on deploy.
+
+**Required environment variables** (set in Railway dashboard):
+
+| Variable | Example | Notes |
+|---|---|---|
+| `LLM_MODEL` | `gemma4:31b-cloud` | Must resolve to a reachable Ollama instance |
+| `OLLAMA_BASE_URL` | `https://your-ollama-instance.com` | See Ollama Cloud docs |
+| `CORS_ORIGINS` | `["https://app.example.com"]` | Your frontend's deployed origin |
+| `DEBUG` | `false` | Disables debug endpoints in production |
+
+**Optional environment variables:**
+
+| Variable | What it enables |
+|---|---|
+| `USDA_API_KEY` | USDA nutrition lookups (api.data.gov) |
+| `LANGSMITH_API_KEY` | LangSmith tracing for agent observability |
+| `SQL_ECHO` | SQLAlchemy statement logging (dev only) |
+
+**Deploy steps:**
+1. Push to GitHub
+2. Connect repo in Railway
+3. Set env vars in Railway dashboard
+4. Railway detects `docker/Dockerfile` and builds
+
+### CI/CD
+
+A GitHub Actions workflow runs on every push/PR (`.github/workflows/ci.yml`):
+- `ruff check .` — Lint
+- `ty check .` — Type check
+- `pytest tests/` — Test suite
+
 ## Extensibility Points
 
 1. **New Themes**: Add entry to `THEMATIC_CONSTRAINTS` + seed ingredients
