@@ -1,5 +1,7 @@
 """Critic agent: validates recipes for lore, science, and cookability."""
 
+import re
+
 import structlog
 
 from src.schemas.agents import AgentState
@@ -55,9 +57,10 @@ def _check_thematic(
         return issues, "PASS"
 
     for word in constraints["forbidden"]:
+        pattern = re.compile(rf"\b{re.escape(word)}\b")
         for ingredient_item in draft_ingredients:
             item_name = ingredient_item.get("item", "").lower()
-            if word in item_name:
+            if pattern.search(item_name):
                 issues.append(
                     ValidationIssue(
                         type="anachronism",
@@ -124,7 +127,11 @@ async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
     except ValueError:
         return NutritionEstimate(notes="No real ingredients found for analysis")
 
-    nut_query = ingredient_name.lower().replace(" ", "_")
+    # ponytail: approximations are blend prose ("bread + honey"); query the
+    # first element so USDA/Fineli/OFF get a single analyzable ingredient.
+    nut_query = (
+        ingredient_name.lower().split("+")[0].split(",")[0].strip()
+    ).replace(" ", "_")
     nut_result = await lookup_nutrition(nut_query)
 
     if nut_result and nut_result.get("source") != "unavailable":
@@ -147,6 +154,8 @@ def _determine_verdict(thematic: str, issues: list) -> str:
     - PASS otherwise
     """
     if thematic == "FAIL":
+        return "FAIL"
+    if any(i.severity == ValidationSeverity.HIGH for i in issues):
         return "FAIL"
     if issues:
         return "WARN"
@@ -189,7 +198,11 @@ async def run_critic(state: AgentState) -> dict:
         state.request.constraints.max_cook_time_minutes,
     )
 
-    nutrition = await _check_nutrition(state.request.fictional_ingredient)
+    nutrition_target = state.request.fictional_ingredient
+    profile = state.ingredient_profile
+    if profile and profile.real_world_approximations:
+        nutrition_target = profile.real_world_approximations[0]["ingredient"]
+    nutrition = await _check_nutrition(nutrition_target)
 
     all_issues = thematic_issues + cook_issues
     verdict = _determine_verdict(thematic, all_issues)

@@ -67,6 +67,20 @@ def _build_prompt(state: AgentState, ctx: dict) -> str:
     profile = ctx["ingredient_profile"]
     pattern = ctx["pattern"]
 
+    feedback = ""
+    if state.iteration > 0 and state.report:
+        issues = state.report.get("validation_issues", [])
+        if issues:
+            feedback = (
+                "\nPrevious Critic Feedback (fix these):\n"
+                + "\n".join(
+                    f"- {i.get('severity')}: {i.get('message')}"
+                    f" {i.get('suggestion', '')}"
+                    for i in issues
+                )
+                + "\n"
+            )
+
     return (
         f"Fictional Ingredient: {ctx['ingredient_name']}\n"
         f"Thematic Group: {request.thematic_group}\n"
@@ -89,6 +103,7 @@ def _build_prompt(state: AgentState, ctx: dict) -> str:
         f"Recipe Pattern Template:"
         f" {pattern.pattern_json if pattern else 'No template found'}\n\n"
         f"RAG Cooking Techniques: {ctx['rag_context']}\n"
+        f"{feedback}"
     )
 
 
