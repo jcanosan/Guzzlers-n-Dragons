@@ -12,6 +12,38 @@ COPY pyproject.toml uv.lock* ./
 # Install dependencies
 RUN uv sync --frozen --no-dev
 
+# Test build stage (includes dev deps for pytest)
+FROM python:3.14-slim AS builder-test
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY pyproject.toml uv.lock* ./
+RUN uv sync --frozen --extra dev
+
+# Test stage
+FROM python:3.14-slim AS test
+
+WORKDIR /app
+
+COPY --from=builder-test /app/.venv .venv
+COPY --from=builder-test /bin/uv /bin/uv
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY data/ ./data/
+COPY scripts/ ./scripts/
+COPY pyproject.toml ./
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Seed SQLite so tests can read ingredients + recipe patterns
+# ingest_cooking_science skipped: needs live Ollama embeddings, mocked in tests
+RUN PYTHONPATH=/app python scripts/seed_fictional_ingredients.py \
+    && PYTHONPATH=/app python scripts/seed_real_ingredients.py \
+    && PYTHONPATH=/app python scripts/seed_recipe_patterns.py
+
+CMD ["pytest", "-v"]
+
 # Runtime stage
 FROM python:3.14-slim
 

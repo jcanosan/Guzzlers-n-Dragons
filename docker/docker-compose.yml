@@ -26,12 +26,9 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      target: test
     command: ["pytest", "-v", "--cov=src", "--cov-report=term-missing"]
     environment:
-      - USDA_API_KEY=${USDA_API_KEY}
-    volumes:
-      - ../data:/app/data
-    depends_on:
-      - app
+      - USDA_API_KEY=${USDA_API_KEY:-}
     profiles:
       - testing
