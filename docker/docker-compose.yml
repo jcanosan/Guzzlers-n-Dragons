@@ -6,8 +6,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - USDA_API_KEY=${USDA_API_KEY}
-      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - USDA_API_KEY=${USDA_API_KEY:-}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
       - LANGSMITH_TRACING=${LANGSMITH_TRACING:-true}
       - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-guzzlers-n-dragons}
       - DATABASE_URL=sqlite:///data/ingredients.db
