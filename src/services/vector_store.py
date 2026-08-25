@@ -27,7 +27,7 @@ class VectorStore:
         )
         embeddings = OllamaEmbeddings(
             model=settings.embedding_model,
-            base_url="http://localhost:11434",
+            base_url=settings.embedding_host,
         )
         self._vector_store = Chroma(
             client=self._client,
@@ -210,7 +210,7 @@ class VectorStore:
                     for c in collections
                 ],
             }
-        except AttributeError, TypeError:
+        except (AttributeError, TypeError):
             logger.warning(
                 "chromadb_api_drift", reason="list_collections shape"
             )

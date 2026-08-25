@@ -148,7 +148,7 @@ def _parse_response(content: str) -> DraftRecipe:
     try:
         data = json.loads(_strip_fences(content))
         return DraftRecipe(**data)
-    except json.JSONDecodeError, ValueError:
+    except (json.JSONDecodeError, ValueError):
         logger.error("creator_parse_failed", content_preview=content[:200])
         raise
 

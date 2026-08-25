@@ -10,6 +10,8 @@ services:
       - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
       - LANGSMITH_TRACING=${LANGSMITH_TRACING:-true}
       - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-guzzlers-n-dragons}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://localhost:11434}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
       - DATABASE_URL=sqlite:///data/ingredients.db
       - CHROMA_PERSIST_DIR=/app/data/chroma
     volumes:

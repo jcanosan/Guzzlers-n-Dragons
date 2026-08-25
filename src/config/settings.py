@@ -35,14 +35,25 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(
         default=["http://localhost:5173"], alias="CORS_ORIGINS"
     )
+    agent_timeout_seconds: int = Field(
+        default=300, alias="AGENT_TIMEOUT_SECONDS"
+    )
 
     # LLM
     llm_model: str = Field(default="gemma4:31b-cloud", alias="LLM_MODEL")
     llm_temperature: float = Field(default=0.7, alias="LLM_TEMPERATURE")
+    ollama_host: str = Field(
+        default="http://localhost:11434", alias="OLLAMA_HOST"
+    )
+    ollama_api_key: str = Field(default="", alias="OLLAMA_API_KEY")
 
     # Embeddings
     embedding_model: str = Field(
         default="nomic-embed-text", alias="EMBEDDING_MODEL"
+    )
+    # Embeddings stay local by default; chat LLM may point at a cloud host.
+    embedding_host: str = Field(
+        default="http://localhost:11434", alias="EMBEDDING_HOST"
     )
 
 

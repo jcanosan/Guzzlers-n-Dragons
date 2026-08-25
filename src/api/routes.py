@@ -3,6 +3,7 @@ import asyncio
 from fastapi import APIRouter, HTTPException, status
 
 from src.agents.graph import agent_graph
+from src.config.settings import settings
 from src.schemas.agents import AgentState
 from src.schemas.domain import FictionalIngredient
 from src.schemas.request import AlchemyRequest
@@ -11,7 +12,7 @@ from src.services.database import get_ingredient_by_name, list_ingredients
 
 router = APIRouter()
 
-AGENT_TIMEOUT_SECONDS = 300
+AGENT_TIMEOUT_SECONDS = settings.agent_timeout_seconds
 
 
 def _get(draft, key: str, default=None):
