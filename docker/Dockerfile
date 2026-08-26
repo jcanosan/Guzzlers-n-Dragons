@@ -61,12 +61,10 @@ COPY scripts/ ./scripts/
 # Set PATH to use venv
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Seed SQLite at build time so the image ships with lore + patterns.
-# ingest_cooking_science is skipped here: it needs live Ollama embeddings,
-# unavailable during image build (run via scripts/run_seeds.py with Ollama).
-RUN PYTHONPATH=/app python scripts/seed_fictional_ingredients.py \
-    && PYTHONPATH=/app python scripts/seed_real_ingredients.py \
-    && PYTHONPATH=/app python scripts/seed_recipe_patterns.py
+# Seed everything at build time: lore + patterns (SQLite) and the
+# cooking-science RAG (Chroma). Embeddings are in-process (fastembed),
+# so the model and populated vector store ship inside the image.
+RUN PYTHONPATH=/app python scripts/run_seeds.py
 
 # Expose port
 EXPOSE 8000

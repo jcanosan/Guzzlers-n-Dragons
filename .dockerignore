@@ -1,0 +1,10 @@
+.env
+.git
+.gitignore
+.github
+build-logs/
+.venv/
+**/__pycache__/
+**/*.pyc
+data/ingredients.db
+data/chroma/
