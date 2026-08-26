@@ -12,7 +12,7 @@ COPY pyproject.toml uv.lock* ./
 # Install dependencies
 RUN uv sync --frozen --no-dev
 
-# Test build stage (includes dev deps for pytest)
+# Test build stage
 FROM python:3.14-slim AS builder-test
 
 WORKDIR /app
@@ -61,10 +61,17 @@ COPY scripts/ ./scripts/
 # Set PATH to use venv
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Seed SQLite at build time so the image ships with lore + patterns.
+# ingest_cooking_science is skipped here: it needs live Ollama embeddings,
+# unavailable during image build (run via scripts/run_seeds.py with Ollama).
+RUN PYTHONPATH=/app python scripts/seed_fictional_ingredients.py \
+    && PYTHONPATH=/app python scripts/seed_real_ingredients.py \
+    && PYTHONPATH=/app python scripts/seed_recipe_patterns.py
+
 # Expose port
 EXPOSE 8000
 
-# Health check (curl not present in slim image; use stdlib urllib)
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD sh -c "python -c \"import os,urllib.request; urllib.request.urlopen('http://localhost:'+os.environ.get('PORT','8000')+'/health')\" || exit 1"
 

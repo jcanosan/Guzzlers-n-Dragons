@@ -1,0 +1,13 @@
+FROM ollama/ollama:latest
+
+# Bake the embedding model into the image so the sidecar serves it
+# immediately (no first-run pull, which would need a shell on Railway).
+# ollama pull needs the server up, so start it transiently during build.
+RUN ollama serve & \
+    sleep 10 && \
+    ollama pull nomic-embed-text
+
+EXPOSE 11434
+
+# Base image already sets ENTRYPOINT ollama; "serve" starts the server.
+CMD ["serve"]
