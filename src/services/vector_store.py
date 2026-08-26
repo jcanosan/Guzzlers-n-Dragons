@@ -96,8 +96,14 @@ class VectorStore:
                   (0.0 = keyword only, 1.0 = vector only)
         """
         self._ensure_initialized()
-        vector_results = self._vector_search(query, num_results * 2, filter)
-        keyword_results = self._keyword_search(query, num_results * 2, filter)
+        try:
+            vector_results = self._vector_search(query, num_results * 2, filter)
+            keyword_results = self._keyword_search(
+                query, num_results * 2, filter
+            )
+        except ConnectionError as exc:
+            logger.warning("vector_search_unavailable", error=str(exc))
+            return []
         merged = self._deduplicate(vector_results, keyword_results)
         return self._rank_results(merged, alpha, num_results)
 
