@@ -69,6 +69,7 @@ async def transform_ingredient(request: AlchemyRequest):
             agent_graph.ainvoke(initial_state),
             timeout=AGENT_TIMEOUT_SECONDS,
         )
+        return _build_result(final_state, request)
     except TimeoutError:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
@@ -80,8 +81,6 @@ async def transform_ingredient(request: AlchemyRequest):
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Agent pipeline failed: {type(exc).__name__}",
         ) from exc
-
-    return _build_result(final_state, request)
 
 
 @router.get("/ingredients", response_model=list[FictionalIngredient])

@@ -2,6 +2,8 @@
 
 from unittest.mock import AsyncMock, patch
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from src.tools.nutrition import lookup_nutrition
 
 
@@ -25,3 +27,22 @@ class TestLookupNutrition:
             result = await lookup_nutrition("apple")
             assert result["source"] == "unavailable"
             assert result["calories_per_serving"] is None
+
+    async def test_db_error_in_seed_path_is_swallowed(self):
+        with (
+            patch("src.services.usda_client.settings.usda_api_key", None),
+            patch(
+                "src.tools.nutrition.fineli_search_food",
+                AsyncMock(return_value=[]),
+            ),
+            patch(
+                "src.tools.nutrition.get_first_nutrition",
+                AsyncMock(return_value=None),
+            ),
+            patch(
+                "src.tools.nutrition.get_ingredient_by_name",
+                side_effect=SQLAlchemyError("db down"),
+            ),
+        ):
+            result = await lookup_nutrition("apple")
+            assert result["source"] == "unavailable"

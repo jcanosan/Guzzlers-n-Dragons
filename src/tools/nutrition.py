@@ -3,6 +3,7 @@
 from typing import NotRequired, TypedDict
 
 import structlog
+from sqlalchemy.exc import SQLAlchemyError
 
 from src.services.database import get_ingredient_by_name
 from src.services.fineli_client import get_nutrition as fineli_get_nutrition
@@ -115,7 +116,13 @@ async def _try_off_nutrition(ingredient_name: str) -> NutritionResult | None:
 
 
 async def _try_seed_nutrition(ingredient_name: str) -> NutritionResult | None:
-    fictional = get_ingredient_by_name(ingredient_name)
+    try:
+        fictional = get_ingredient_by_name(ingredient_name)
+    except SQLAlchemyError as exc:
+        logger.error(
+            "seed_nutrition_failed", ingredient=ingredient_name, error=str(exc)
+        )
+        return None
     if not fictional or not fictional.real_world_approximations:
         logger.info("seed_no_match", ingredient=ingredient_name)
         return None
