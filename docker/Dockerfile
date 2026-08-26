@@ -37,7 +37,6 @@ COPY pyproject.toml ./
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Seed SQLite so tests can read ingredients + recipe patterns
-# ingest_cooking_science skipped: needs live Ollama embeddings, mocked in tests
 RUN PYTHONPATH=/app python scripts/seed_fictional_ingredients.py \
     && PYTHONPATH=/app python scripts/seed_real_ingredients.py \
     && PYTHONPATH=/app python scripts/seed_recipe_patterns.py
@@ -61,9 +60,7 @@ COPY scripts/ ./scripts/
 # Set PATH to use venv
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Seed everything at build time: lore + patterns (SQLite) and the
-# cooking-science RAG (Chroma). Embeddings are in-process (fastembed),
-# so the model and populated vector store ship inside the image.
+# Seed everything at build time
 RUN PYTHONPATH=/app python scripts/run_seeds.py
 
 # Expose port
@@ -73,5 +70,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD sh -c "python -c \"import os,urllib.request; urllib.request.urlopen('http://localhost:'+os.environ.get('PORT','8000')+'/health')\" || exit 1"
 
-# Run application (Railway injects PORT; default 8000 for local/compose)
+# Run application
 CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
