@@ -112,7 +112,7 @@ CREATE TABLE recipe_patterns (
 
 - **Collections**: `cooking_techniques`, `flavor_pairings`, `substitution_rules`, `food_science`
 - **Chunking**: ~500 tokens with 50-token overlap
-- **Embedding**: `nomic-embed-text`
+- **Embedding**: `BAAI/bge-small-en-v1.5`
 - **Metadata**: `source`, `category`, `technique_type`, `difficulty`
 
 ### External API Integration
@@ -153,18 +153,18 @@ THEMATIC_CONSTRAINTS = {
     "high_fantasy": {
         "forbidden": ["tomato", "potato", "corn", "chocolate", "chili_pepper"],
         "tech_level": "pre_industrial",
-        "allowed_magic": "ingredient_based"
+        "allowed_magic": "ingredient_based",
     },
     "sci_fi": {
         "forbidden": [],
         "tech_level": "advanced",
-        "allowed_magic": "technological"
+        "allowed_magic": "technological",
     },
     "mythological": {
         "forbidden": [],
         "tech_level": "ancient",
-        "allowed_magic": "divine"
-    }
+        "allowed_magic": "divine",
+    },
 }
 ```
 

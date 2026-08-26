@@ -5,7 +5,7 @@ import structlog
 from chromadb.api import ClientAPI as ChromaClient
 from chromadb.config import Settings as ChromaSettings
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 
 from src.config.settings import settings
 
@@ -25,10 +25,7 @@ class VectorStore:
             path=settings.chroma_persist_dir,
             settings=ChromaSettings(anonymized_telemetry=False),
         )
-        embeddings = OllamaEmbeddings(
-            model=settings.embedding_model,
-            base_url=settings.embedding_host,
-        )
+        embeddings = FastEmbedEmbeddings(model_name=settings.embedding_model)
         self._vector_store = Chroma(
             client=self._client,
             collection_name="cooking_science",

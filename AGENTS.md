@@ -7,7 +7,8 @@
 
 ## Core Tech Stack
 - **Runtime**: Python 3.14 (via `uv`)
-- **LLM/Embeddings**: Ollama (`gemma4:31b-cloud` chat, `nomic-embed-text` embeddings)
+- **LLM**: `gemma4:31b-cloud` in Ollama
+- **Embeddings**: `BAAI/bge-small-en-v1.5`
 - **Orchestration**: LangGraph (Planner $\to$ Creator $\to$ Critic)
 - **Data**: SQLite (Structured Lore) + ChromaDB (Cooking Science RAG) + External APIs (USDA/TheMealDB)
 - **API**: FastAPI

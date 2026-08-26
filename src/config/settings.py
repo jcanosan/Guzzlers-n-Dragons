@@ -47,13 +47,9 @@ class Settings(BaseSettings):
     )
     ollama_api_key: str = Field(default="", alias="OLLAMA_API_KEY")
 
-    # Embeddings
+    # Embeddings (in-process, no server needed)
     embedding_model: str = Field(
-        default="nomic-embed-text", alias="EMBEDDING_MODEL"
-    )
-    # Embeddings stay local by default; chat LLM may point at a cloud host.
-    embedding_host: str = Field(
-        default="http://localhost:11434", alias="EMBEDDING_HOST"
+        default="BAAI/bge-small-en-v1.5", alias="EMBEDDING_MODEL"
     )
 
 

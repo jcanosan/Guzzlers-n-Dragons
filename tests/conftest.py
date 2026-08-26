@@ -8,11 +8,11 @@ from tests.mock_embeddings import MockEmbeddings
 
 
 @pytest.fixture(autouse=True, scope="session")
-def mock_ollama_embeddings():
-    """Replace OllamaEmbeddings with all-zero vectors across all tests.
+def mock_embeddings():
+    """Replace FastEmbedEmbeddings with all-zero vectors across all tests.
 
-    Prevents every test from needing a running Ollama instance for
-    embedding calls (nomic-embed-text). Applied once per session.
+    Keeps the test suite offline — no model download, no HF Hub calls.
+    Applied once per session.
     """
     # Import if not already loaded (settings tests run before vector store)
     if "src.services.vector_store" not in sys.modules:
@@ -23,7 +23,7 @@ def mock_ollama_embeddings():
     with pytest.MonkeyPatch.context() as m:
         m.setattr(
             sys.modules["src.services.vector_store"],
-            "OllamaEmbeddings",
+            "FastEmbedEmbeddings",
             MockEmbeddings,
         )
         yield
