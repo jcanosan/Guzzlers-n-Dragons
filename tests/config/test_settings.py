@@ -2,8 +2,17 @@ from src.config.settings import Settings
 
 
 class TestSettings:
-    def test_defaults(self):
-        s = Settings()
+    def test_defaults(self, monkeypatch):
+        for key in (
+            "DATABASE_URL",
+            "DEBUG",
+            "LLM_MODEL",
+            "LLM_TEMPERATURE",
+            "AGENT_TIMEOUT_SECONDS",
+            "EMBEDDING_MODEL",
+        ):
+            monkeypatch.delenv(key, raising=False)
+        s = Settings(_env_file=None)
         assert s.database_url == "sqlite:///data/ingredients.db"
         assert s.debug is False
         assert s.llm_model == "gemma4:31b-cloud"
