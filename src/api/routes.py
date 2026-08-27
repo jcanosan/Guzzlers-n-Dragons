@@ -1,5 +1,6 @@
 import asyncio
 
+import structlog
 from fastapi import APIRouter, HTTPException, status
 
 from src.agents.graph import agent_graph
@@ -11,6 +12,8 @@ from src.schemas.response import AlchemyResult, PlausibilityReport, Recipe
 from src.services.database import get_ingredient_by_name, list_ingredients
 
 router = APIRouter()
+
+logger = structlog.get_logger()
 
 AGENT_TIMEOUT_SECONDS = settings.agent_timeout_seconds
 
@@ -77,6 +80,7 @@ async def transform_ingredient(request: AlchemyRequest):
             "may be unresponsive. Retry with a simpler ingredient.",
         )
     except Exception as exc:
+        logger.exception("agent_pipeline_failed")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Agent pipeline failed: {type(exc).__name__}",
