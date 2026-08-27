@@ -21,8 +21,8 @@ from src.tools.validation import validate_ingredient
 async def lookup_ingredient_nutrition(ingredient_name: str) -> NutritionResult:
     """Look up nutrition data for an ingredient with multi-source fallback.
 
-    Tries USDA first, then Fineli (EU government data), then Open Food Facts,
-    then the seeded ingredient database. Returns macros and data source.
+    Tries USDA first, then Open Food Facts, then the seeded ingredient
+    database. Returns macros and data source.
 
     Args:
         ingredient_name: Name of the ingredient to look up

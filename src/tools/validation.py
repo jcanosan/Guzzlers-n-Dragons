@@ -2,7 +2,7 @@
 
 Charset-allowlist + length cap to mitigate request amplification and
 clamping of external API query strings. User-supplied strings flow
-into outbound HTTP calls (USDA, Fineli, Open Food Facts, TheMealDB);
+into outbound HTTP calls (USDA, Open Food Facts, TheMealDB);
 reject them here to prevent abuse.
 """
 

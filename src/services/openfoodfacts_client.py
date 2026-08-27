@@ -1,7 +1,7 @@
 """Open Food Facts API client (crowd-sourced, global, no API key needed).
 
-Fallback nutrition source when USDA and Fineli are unavailable.
-Product-based (branded foods), not ingredient-based like USDA/Fineli.
+Fallback nutrition source when USDA is unavailable.
+Product-based (branded foods), not ingredient-based like USDA.
 Rate-limited for anonymous requests; use as last resort only.
 """
 

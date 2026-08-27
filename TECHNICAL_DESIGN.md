@@ -117,7 +117,7 @@ CREATE TABLE recipe_patterns (
 
 ### External API Integration
 
-Currently, each external data source (USDA, Fineli, Open Food Facts, TheMealDB)
+Currently, each external data source (USDA, Open Food Facts, TheMealDB)
 is accessed via a plain `httpx` async client. Agent-facing tools are declared
 with LangChain's `@tool` decorator — same semantics as MCP (name, description,
 structured schema), but without the MCP wire protocol.
@@ -134,7 +134,6 @@ Each data source will become its own MCP server in a separate repository:
 
 ```
 usda-mcp-server/       ← stdio JSON-RPC server wrapping USDA REST API
-fineli-mcp-server/     ← stdio JSON-RPC server wrapping Fineli REST API
 off-mcp-server/        ← stdio JSON-RPC server wrapping Open Food Facts API
 ```
 

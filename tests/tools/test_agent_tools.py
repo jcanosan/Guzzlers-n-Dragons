@@ -30,10 +30,6 @@ class TestLookupIngredientNutrition:
         with (
             patch("src.services.usda_client.settings.usda_api_key", None),
             patch(
-                "src.tools.nutrition.fineli_search_food",
-                AsyncMock(return_value=[]),
-            ),
-            patch(
                 "src.tools.nutrition.get_first_nutrition",
                 AsyncMock(return_value=None),
             ),

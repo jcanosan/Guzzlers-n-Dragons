@@ -12,10 +12,6 @@ class TestLookupNutrition:
         with (
             patch("src.services.usda_client.settings.usda_api_key", None),
             patch(
-                "src.tools.nutrition.fineli_search_food",
-                AsyncMock(return_value=[]),
-            ),
-            patch(
                 "src.tools.nutrition.get_first_nutrition",
                 AsyncMock(return_value=None),
             ),
@@ -31,10 +27,6 @@ class TestLookupNutrition:
     async def test_db_error_in_seed_path_is_swallowed(self):
         with (
             patch("src.services.usda_client.settings.usda_api_key", None),
-            patch(
-                "src.tools.nutrition.fineli_search_food",
-                AsyncMock(return_value=[]),
-            ),
             patch(
                 "src.tools.nutrition.get_first_nutrition",
                 AsyncMock(return_value=None),

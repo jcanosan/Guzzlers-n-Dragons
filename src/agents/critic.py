@@ -119,7 +119,7 @@ def _check_cookability(
 
 
 async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
-    """Look up nutrition data via the fallback chain (USDA -> Fineli -> OFF)."""
+    """Look up nutrition data via the fallback chain (USDA -> OFF)."""
     from src.tools.validation import validate_ingredient
 
     try:

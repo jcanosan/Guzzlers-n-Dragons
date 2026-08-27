@@ -1,4 +1,4 @@
-"""Nutrition lookup chain: USDA → Fineli → Open Food Facts → DB."""
+"""Nutrition lookup chain: USDA → Open Food Facts → DB."""
 
 from typing import NotRequired, TypedDict
 
@@ -6,8 +6,6 @@ import structlog
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.services.database import get_ingredient_by_name
-from src.services.fineli_client import get_nutrition as fineli_get_nutrition
-from src.services.fineli_client import search_food as fineli_search_food
 from src.services.openfoodfacts_client import get_first_nutrition
 from src.services.usda_client import get_nutrition, search_food
 
@@ -27,14 +25,10 @@ class NutritionResult(TypedDict):
 
 
 async def lookup_nutrition(ingredient_name: str) -> NutritionResult:
-    """Look up nutrition data, chaining USDA → Fineli → Open Food Facts → DB."""
+    """Look up nutrition data, chaining USDA → Open Food Facts → DB."""
     usda = await _try_usda_nutrition(ingredient_name)
     if usda:
         return usda
-
-    fineli = await _try_fineli_nutrition(ingredient_name)
-    if fineli:
-        return fineli
 
     off = await _try_off_nutrition(ingredient_name)
     if off:
@@ -72,30 +66,6 @@ async def _try_usda_nutrition(ingredient_name: str) -> NutritionResult | None:
         "fat_g": nutrients.get("fat_g"),
         "fiber_g": nutrients.get("fiber_g"),
         "source": "usda",
-    }
-
-
-async def _try_fineli_nutrition(ingredient_name: str) -> NutritionResult | None:
-    foods = await fineli_search_food(ingredient_name)
-    if not foods:
-        return None
-
-    food_id = foods[0].get("id")
-    if not food_id:
-        return None
-
-    nutrients = await fineli_get_nutrition(food_id)
-    if not nutrients:
-        return None
-
-    logger.info("fineli_nutrition_found", ingredient=ingredient_name)
-    return {
-        "calories_per_serving": nutrients.get("calories"),
-        "protein_g": nutrients.get("protein_g"),
-        "carbs_g": nutrients.get("carbs_g"),
-        "fat_g": nutrients.get("fat_g"),
-        "fiber_g": nutrients.get("fiber_g"),
-        "source": "fineli",
     }
 
 
