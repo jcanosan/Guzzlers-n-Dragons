@@ -70,6 +70,18 @@ class TestPlanner:
             assert isinstance(result["planner_result"], PlannerResult)
             assert result["planner_result"].knowledge_queries
 
+    async def test_planner_raises_on_bad_json(self, basic_request):
+        state = AgentState(request=basic_request)
+
+        with (
+            patch(
+                "src.agents.planner.call_llm",
+                AsyncMock(return_value=AIMessage(content="not json")),
+            ),
+            pytest.raises(ValueError),
+        ):
+            await run_planner(state)
+
 
 class TestCreator:
     async def test_creator_with_mocked_llm(self, basic_request, planner_result):

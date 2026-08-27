@@ -1,5 +1,7 @@
 """Planner agent: extracts constraints, identifies techniques, plans needs."""
 
+import json
+
 import structlog
 
 from src.agents.llm import call_llm
@@ -122,14 +124,12 @@ def _strip_fences(content: str) -> str:
 
 def _parse_response(content: str) -> PlannerResult:
     """Parse the LLM response into a PlannerResult."""
-    import json
-
     try:
         data = json.loads(_strip_fences(content))
         return PlannerResult(**data)
-    except (json.JSONDecodeError, ValueError) as exc:
-        logger.warning("planner_parse_failed", error=str(exc))
-        return PlannerResult()
+    except (json.JSONDecodeError, ValueError):
+        logger.error("planner_parse_failed", content_preview=content[:200])
+        raise
 
 
 async def run_planner(state: AgentState) -> dict:

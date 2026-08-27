@@ -67,6 +67,41 @@ class TestSimilaritySearch:
         assert results == []
 
 
+class TestHybridSearch:
+    def test_keyword_failure_degrades_to_vector_only(
+        self, test_store, monkeypatch
+    ):
+        vector_store.add_documents(
+            [{"content": "How to thicken a sauce", "metadata": {}}]
+        )
+
+        def boom(query, k, filter):
+            raise RuntimeError("chroma keyword search down")
+
+        monkeypatch.setattr(vector_store, "_keyword_search", boom)
+        results = vector_store.hybrid_search("thickening sauce", num_results=2)
+        assert results, "keyword failure must degrade, not return []"
+        assert any(
+            "sauce" in r["content"] for r in results
+        )
+
+    def test_keyword_branch_finds_token_match(self, test_store):
+        vector_store.add_documents(
+            [
+                {
+                    "content": "How to thicken a sauce with cornstarch",
+                    "metadata": {},
+                },
+                {"content": "Making beurre blanc emulsion", "metadata": {}},
+            ]
+        )
+        results = vector_store._keyword_search(
+            "thickening cornstarch", k=2, filter=None
+        )
+        assert results
+        assert any("cornstarch" in doc.page_content for doc, _ in results)
+
+
 class TestCollectionStats:
     def test_before_init(self):
         stats = vector_store.get_collection_stats()

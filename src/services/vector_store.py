@@ -98,9 +98,16 @@ class VectorStore:
             keyword_results = self._keyword_search(
                 query, num_results * 2, filter
             )
-        except ConnectionError as exc:
-            logger.warning("vector_search_unavailable", error=str(exc))
-            return []
+        except Exception as exc:
+            logger.warning(
+                "vector_search_degraded",
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
+            keyword_results = []
+            vector_results = (
+                self._vector_search(query, num_results * 2, filter) or []
+            )
         merged = self._deduplicate(vector_results, keyword_results)
         return self._rank_results(merged, alpha, num_results)
 
@@ -115,10 +122,13 @@ class VectorStore:
     def _keyword_search(
         self, query: str, k: int, filter: dict | None
     ) -> list[tuple]:
-        """Text-match search using Chroma's where_document filter."""
+        """Token-based text match using Chroma's where_document filter."""
         if not query or self._vector_store is None:
             return []
-        where_document: dict | None = {"$contains": query.lower()}
+        tokens = [t for t in query.lower().split() if t]
+        if not tokens:
+            return []
+        where_document = {"$or": [{"$contains": t} for t in tokens]}
         return self._vector_store.similarity_search_with_score(
             query=query, k=k, filter=filter, where_document=where_document
         )
