@@ -26,7 +26,7 @@ class TestSearchFood:
     async def test_mocked_search(self, mock_off):
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "products": [{"product_name": "Apple", "nutriments": {}}]
+            "hits": [{"product_name": "Apple", "nutriments": {}}]
         }
         mock_off.get.return_value = mock_response
 
@@ -72,7 +72,7 @@ class TestGetFirstNutrition:
     async def test_delegates(self, mock_off):
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "products": [
+            "hits": [
                 {
                     "product_name": "Milk",
                     "nutriments": {"energy-kcal_100g": 65},

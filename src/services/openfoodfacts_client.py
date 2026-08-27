@@ -10,27 +10,35 @@ import structlog
 
 logger = structlog.get_logger()
 
-OFF_BASE_URL = "https://world.openfoodfacts.org"
+OFF_BASE_URL = "https://search.openfoodfacts.org"
+
+# OFF requires an identifying User-Agent or we get throttled/blocked.
+OFF_USER_AGENT = (
+    "Guzzlers-n-Dragons/0.1 (https://github.com/luponsio/Guzzlers-n-Dragons)"
+)
 
 
 async def search_food(query: str, page_size: int = 3) -> list[dict]:
     """Search Open Food Facts for a food product by name.
 
+    Uses Search-a-licious, OFF's endorsed full-text search replacement.
     Returns products with nutriments per 100g.
     """
-    async with httpx.AsyncClient(timeout=10) as client:
+    async with httpx.AsyncClient(
+        timeout=10, headers={"User-Agent": OFF_USER_AGENT}
+    ) as client:
         try:
             response = await client.get(
-                f"{OFF_BASE_URL}/cgi/search.pl",
+                f"{OFF_BASE_URL}/search",
                 params={
-                    "search_terms": query,
-                    "json": "true",
+                    "q": query,
                     "page_size": page_size,
+                    "fields": "code,product_name,nutriments",
                 },
             )
             response.raise_for_status()
             data = response.json()
-            products = data.get("products", [])
+            products = data.get("hits", [])
             logger.info("off_search", query=query, result_count=len(products))
             return products
         except (httpx.HTTPError, ValueError) as exc:
