@@ -1,5 +1,6 @@
 """TheMealDB API client for pattern extraction from real recipes."""
 
+import asyncio
 import re
 import unicodedata
 
@@ -134,12 +135,13 @@ async def find_recipe_patterns(ingredient: str) -> list[dict]:
     if not meals:
         return []
 
+    meal_ids = [meal["idMeal"] for meal in meals[:5] if meal.get("idMeal")]
+    details_list = await asyncio.gather(
+        *(get_meal_details(meal_id) for meal_id in meal_ids)
+    )
+
     patterns = []
-    for meal in meals[:5]:
-        meal_id = meal.get("idMeal")
-        if not meal_id:
-            continue
-        details = await get_meal_details(meal_id)
+    for details in details_list:
         if details is None:
             continue
 
