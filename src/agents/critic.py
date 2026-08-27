@@ -127,8 +127,6 @@ async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
     except ValueError:
         return NutritionEstimate(notes="No real ingredients found for analysis")
 
-    # ponytail: approximations are blend prose ("bread + honey"); query the
-    # first element so USDA/Fineli/OFF get a single analyzable ingredient.
     nut_query = (
         ingredient_name.lower().split("+")[0].split(",")[0].strip()
     ).replace(" ", "_")
