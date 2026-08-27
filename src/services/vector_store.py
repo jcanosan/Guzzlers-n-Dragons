@@ -130,7 +130,10 @@ class VectorStore:
             return []
         where_document = {"$or": [{"$contains": t} for t in tokens]}
         return self._vector_store.similarity_search_with_score(
-            query=query, k=k, filter=filter, where_document=where_document
+            query=query,
+            k=k,
+            filter=filter,
+            where_document=where_document,  # ty: ignore[invalid-argument-type]
         )
 
     def _deduplicate(
