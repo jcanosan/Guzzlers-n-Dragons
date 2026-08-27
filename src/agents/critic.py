@@ -11,7 +11,7 @@ from src.schemas.response import (
     ValidationIssue,
     ValidationSeverity,
 )
-from src.tools.nutrition import lookup_nutrition
+from src.tools.nutrition import lookup_nutrition, resolve_approximation
 
 logger = structlog.get_logger()
 
@@ -118,7 +118,9 @@ def _check_cookability(
     return issues
 
 
-async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
+async def _check_nutrition(
+    ingredient_name: str, fictional_name: str | None = None
+) -> NutritionEstimate:
     """Look up nutrition data via the fallback chain (USDA -> OFF)."""
     from src.tools.validation import validate_ingredient
 
@@ -127,18 +129,20 @@ async def _check_nutrition(ingredient_name: str) -> NutritionEstimate:
     except ValueError:
         return NutritionEstimate(notes="No real ingredients found for analysis")
 
-    nut_query = (
-        ingredient_name.lower().split("+")[0].split(",")[0].strip()
-    ).replace(" ", "_")
+    nut_query = ingredient_name.lower().split("+")[0].split(",")[0].strip()
     nut_result = await lookup_nutrition(nut_query)
 
     if nut_result and nut_result.get("source") != "unavailable":
+        source = nut_result.get("source", "unknown")
+        approx = fictional_name and fictional_name.lower() != nut_query
+        if approx:
+            source = f"{source} (approx: {nut_query})"
         return NutritionEstimate(
             calories_per_serving=nut_result.get("calories_per_serving"),
             protein_g=nut_result.get("protein_g"),
             carbs_g=nut_result.get("carbs_g"),
             fat_g=nut_result.get("fat_g"),
-            notes=f"Source: {nut_result.get('source', 'unknown')}",
+            notes=f"Source: {source}",
         )
 
     return NutritionEstimate(notes="No real ingredients found for analysis")
@@ -196,11 +200,12 @@ async def run_critic(state: AgentState) -> dict:
         state.request.constraints.max_cook_time_minutes,
     )
 
-    nutrition_target = state.request.fictional_ingredient
-    profile = state.ingredient_profile
-    if profile and profile.real_world_approximations:
-        nutrition_target = profile.real_world_approximations[0]["ingredient"]
-    nutrition = await _check_nutrition(nutrition_target)
+    nutrition_target = await resolve_approximation(
+        state.request.fictional_ingredient, state.ingredient_profile
+    )
+    nutrition = await _check_nutrition(
+        nutrition_target, state.request.fictional_ingredient
+    )
 
     all_issues = thematic_issues + cook_issues
     verdict = _determine_verdict(thematic, all_issues)

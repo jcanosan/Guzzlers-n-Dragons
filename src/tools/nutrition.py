@@ -5,11 +5,25 @@ from typing import NotRequired, TypedDict
 import structlog
 from sqlalchemy.exc import SQLAlchemyError
 
+from src.agents.llm import call_llm
+from src.schemas.domain import FictionalIngredient
 from src.services.database import get_ingredient_by_name
 from src.services.openfoodfacts_client import get_first_nutrition
 from src.services.usda_client import get_nutrition, search_food
 
 logger = structlog.get_logger()
+
+APPROXIMATION_SYSTEM_PROMPT = (
+    "You map a fictional food ingredient to the single closest real-world"
+    " ingredient a nutrition database would recognize.\n"
+    "Reply with ONLY the real ingredient name. No quotes, no explanations,"
+    " no recipe, no list. Strip any fictional modifiers (mutant, golden,"
+    " magical, etc.).\n"
+    "Examples:\n"
+    "  mutant cow milk -> cow milk\n"
+    "  manticore leg -> venison leg\n"
+    "  blue dragon pepper -> bell pepper"
+)
 
 
 class NutritionResult(TypedDict):
@@ -22,6 +36,39 @@ class NutritionResult(TypedDict):
     fiber_g: float | None
     source: str
     approximations: NotRequired[list[dict]]
+
+
+async def resolve_approximation(
+    ingredient_name: str, profile: FictionalIngredient | None
+) -> str:
+    """Resolve the real-world ingredient to query nutrition for.
+
+    Prefers a seeded approximation, else asks the LLM to map the
+    fictional name to a real ingredient. Falls back to the raw name if
+    the LLM call or parse fails.
+    """
+    if profile and profile.real_world_approximations:
+        return profile.real_world_approximations[0]["ingredient"]
+
+    try:
+        response = await call_llm(
+            APPROXIMATION_SYSTEM_PROMPT,
+            f"Fictional ingredient: {ingredient_name}",
+        )
+        approx = str(response.content).strip().strip('"').strip(".")
+        if approx and "->" not in approx:
+            logger.info(
+                "llm_approximation", ingredient=ingredient_name, approx=approx
+            )
+            return approx
+    except Exception:
+        logger.warning(
+            "llm_approximation_failed",
+            ingredient=ingredient_name,
+            exc_info=True,
+        )
+
+    return ingredient_name
 
 
 async def lookup_nutrition(ingredient_name: str) -> NutritionResult:

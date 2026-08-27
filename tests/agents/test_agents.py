@@ -176,6 +176,39 @@ class TestCritic:
                 i["type"] == "cookability" for i in report["validation_issues"]
             )
 
+    async def test_critic_uses_llm_approximation_for_unseeded_ingredient(
+        self, draft_recipe
+    ):
+        request = AlchemyRequest(
+            fictional_ingredient="mutant cow milk",
+            meal_type="ice cream",
+            thematic_group="sci_fi",
+            constraints=Constraints(servings=2, max_prep_time_minutes=60),
+        )
+        state = AgentState(request=request, draft_recipe=draft_recipe)
+
+        with (
+            patch(
+                "src.agents.critic.resolve_approximation",
+                AsyncMock(return_value="cow milk"),
+            ),
+            patch(
+                "src.agents.critic.lookup_nutrition",
+                AsyncMock(
+                    return_value={
+                        "calories_per_serving": 61,
+                        "protein_g": 3.2,
+                        "source": "usda",
+                    }
+                ),
+            ),
+        ):
+            result = await run_critic(state)
+            report = result["report"]
+            est = report["nutrition_estimate"]
+            assert est["calories_per_serving"] == 61
+            assert "approx: cow milk" in est["notes"]
+
 
 class TestGetPatternByMealType:
     def test_returns_none_for_unknown_type(self):
