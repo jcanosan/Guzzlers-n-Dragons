@@ -20,7 +20,7 @@ class VectorStore:
         self._client: ChromaClient | None = None
 
     def init(self) -> None:
-        """Initialize the Chroma vector store with Ollama embeddings."""
+        """Initialize the Chroma vector store with FastEmbed embeddings."""
         self._client = chromadb.PersistentClient(
             path=settings.chroma_persist_dir,
             settings=ChromaSettings(anonymized_telemetry=False),

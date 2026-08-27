@@ -1,14 +1,14 @@
-"""Mock embedding function for tests — avoids Ollama dependency in CI."""
+"""Mock embedding function for tests — avoids FastEmbed model download in CI."""
 
 from langchain_core.embeddings import Embeddings
 
-VECTOR_SIZE = 768
+VECTOR_SIZE = 384
 
 
 class MockEmbeddings(Embeddings):
     """Returns all-zero vectors. Good enough for testing retrieval logic.
 
-    Accepts any kwargs to replace OllamaEmbeddings — model name,
+    Accepts any kwargs to replace FastEmbedEmbeddings — model name,
     configuration, etc. are all silently ignored.
     """
 
