@@ -16,7 +16,8 @@ services:
       - DATABASE_URL=sqlite:///data/ingredients.db
       - CHROMA_PERSIST_DIR=/app/data/chroma
     volumes:
-      - ../data:/app/data
+      - ../data/ingredients.db:/app/data/ingredients.db
+      - ../data/chroma:/app/data/chroma
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
