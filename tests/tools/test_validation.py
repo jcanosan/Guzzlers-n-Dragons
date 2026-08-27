@@ -19,6 +19,10 @@ class TestValidateIngredient:
     def test_allows_punctuation(self):
         assert validate_ingredient("apple, with-seeds") == "apple, with-seeds"
 
+    def test_allows_latin_accented_chars(self):
+        assert validate_ingredient("jalapeño") == "jalapeño"
+        assert validate_ingredient("crème fraîche") == "crème fraîche"
+
     def test_rejects_empty(self):
         with pytest.raises(InvalidIngredientError, match="empty"):
             validate_ingredient("")

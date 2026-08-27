@@ -9,7 +9,7 @@ reject them here to prevent abuse.
 import re
 
 MAX_INGREDIENT_LENGTH = 100
-_VALID_PATTERN = re.compile(r"^[\w\s'.,()\-+]+$")
+_VALID_PATTERN = re.compile(r"^[\w\s'.,()\-+\u00C0-\u017F]+$")
 
 
 class InvalidIngredientError(ValueError):
