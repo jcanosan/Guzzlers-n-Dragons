@@ -46,7 +46,9 @@
 4. **Critic Phase**:
    - Validates thematic consistency (anachronism check, tech level)
    - Verifies cookability (clear steps, reasonable times/temps)
-   - Checks nutrition sanity via USDA API
+   - Resolves the fictional ingredient to a real-world approximation
+     (seeded → LLM → raw fallback), then checks nutrition via the
+     USDA → Open Food Facts → DB chain
    - Validates magical/extraordinary claims have lore justification
    - Outputs: Final recipe + detailed plausibility report
 5. **Response**: Structured JSON with recipe, substitutions, nutrition, validation notes
@@ -69,7 +71,8 @@
 
 - **Input**: DraftRecipe + original request + ingredient lore
 - **Output**: ValidatedRecipe + PlausibilityReport (issues, substitutions, nutrition)
-- **Tools**: Thematic validator, cookability checker, USDA nutrition verifier
+- **Tools**: Thematic validator, cookability checker, nutrition approximation
+  resolver + lookup chain (USDA → Open Food Facts → DB)
 
 ## Knowledge Base Design
 
@@ -176,9 +179,14 @@ THEMATIC_CONSTRAINTS = {
 
 ### Nutrition Sanity
 
-- Calorie estimates via USDA for real ingredients
-- Magical ingredients: flagged as "unknown" with lore-based estimates
-- Warning if claimed effects contradict nutrition science
+- Fictional ingredients are resolved to a real-world approximation first:
+  a seeded `real_world_approximations[0]["ingredient"]` if present, else an
+  LLM mapping (strips fictional modifiers, e.g. "mutant cow milk" → "cow milk"),
+  else the raw name as a last resort.
+- Nutrition lookup chains USDA → Open Food Facts → seeded DB (`lookup_nutrition`).
+- Approximated lookups are flagged in the report notes as `(approx: <term>)`.
+- When every source misses, the estimate returns no macros with
+  `source: "unavailable"` and a "No real ingredients found for analysis" note.
 
 ## API Contract
 
@@ -218,7 +226,7 @@ THEMATIC_CONSTRAINTS = {
     "thematic_consistency": "PASS|WARN|FAIL",
     "notes": [...],
     "substitutions": [{"for": "...", "options": [...]}],
-    "nutrition_estimate": {"calories_per_serving": 22, "notes": "..."},
+    "nutrition_estimate": {"calories_per_serving": 22, "notes": "Source: usda (approx: <term>)"},
     "validation_issues": [...]
   },
   "metadata": {

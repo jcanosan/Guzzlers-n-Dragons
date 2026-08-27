@@ -29,6 +29,7 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 - [x] TheMealDB API client (httpx, async)
 - [x] Agent tools via LangChain @tool decorator (agent-discoverable, schema-validated)
 - [x] Tools: nutrition lookup, recipe pattern extraction, technique aggregation
+- [x] Nutrition approximation resolver: LLM maps unseeded fictional ingredients to real-world equivalents
 - [x] Tests: API client mock/unit + agent tool integration tests
 
 ### Phase 4: Agent System
@@ -47,7 +48,8 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 ### Phase 6: Polish & Deploy
 
 - [x] Integration + e2e tests, CI/CD (GitHub Actions)
-- [ ] Railway deploy, demo recordings, architecture diagram, talking points
+- [x] Railway deploy
+- [ ] Showcase demo, architecture diagram
 
 ## Milestones
 

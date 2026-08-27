@@ -7,6 +7,8 @@ AI recipe alchemist that transforms fictional ingredients (e.g. from books, game
 - **Multi-agent orchestration** (LangGraph): Planner → Creator → Critic with validation loop
 - **Knowledge fusion**: SQL (structured lore) + RAG (cooking science) + External APIs (live data)
 - **Constraint-aware generation**: Dietary, time, equipment, thematic consistency
+- **Nutrition estimation**: USDA → Open Food Facts → DB lookup with LLM-based
+  real-world approximation for arbitrary fictional ingredients
 - **Production patterns**: Async FastAPI, Pydantic validation, Docker, CI/CD, observability
 
 ## Thematic Groups
