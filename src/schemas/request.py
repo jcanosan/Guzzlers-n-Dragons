@@ -17,7 +17,5 @@ class AlchemyRequest(BaseModel):
 
     fictional_ingredient: str = Field(..., min_length=1, max_length=100)
     meal_type: str = Field(..., min_length=1, max_length=50)
-    thematic_group: str = Field(
-        ..., pattern="^(fantasy|sci_fi|mythological)$"
-    )
+    thematic_group: str = Field(..., pattern="^(fantasy|sci_fi|mythological)$")
     constraints: Constraints = Field(default_factory=Constraints)

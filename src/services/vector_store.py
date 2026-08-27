@@ -226,7 +226,7 @@ class VectorStore:
                     for c in collections
                 ],
             }
-        except (AttributeError, TypeError):
+        except AttributeError, TypeError:
             logger.warning(
                 "chromadb_api_drift", reason="list_collections shape"
             )

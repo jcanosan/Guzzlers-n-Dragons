@@ -127,7 +127,7 @@ def _parse_response(content: str) -> PlannerResult:
     try:
         data = json.loads(_strip_fences(content))
         return PlannerResult(**data)
-    except (json.JSONDecodeError, ValueError):
+    except json.JSONDecodeError, ValueError:
         logger.error("planner_parse_failed", content_preview=content[:200])
         raise
 
