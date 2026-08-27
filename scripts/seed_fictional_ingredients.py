@@ -4,14 +4,14 @@
 from src.schemas.domain import FictionalIngredient
 from src.services.database import init_db, seed_fictional_ingredients
 
-HIGH_FANTASY = [
+FANTASY = [
     FictionalIngredient(
         name="lembas",
         description=(
             "Elven waybread from Lothlórien. Small cakes that sustain a "
             "traveler for days. Light, sweet, and remarkably filling."
         ),
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         taste_profile={"sweet": 0.6, "nutty": 0.3, "earthy": 0.1},
         texture="dense, dry cake",
         rarity="rare",
@@ -42,7 +42,7 @@ HIGH_FANTASY = [
             "The cordial of Imladris, a clear, fragrant liquor made by the "
             "Elves of Rivendell. Revives strength and heals weariness."
         ),
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         taste_profile={
             "sweet": 0.4,
             "floral": 0.3,
@@ -78,7 +78,7 @@ HIGH_FANTASY = [
             "Dale-men's waybread. Hard, biscuit-like, keeps indefinitely but "
             "lacks the grace of lembas. Sustains life but not spirit."
         ),
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         taste_profile={"salty": 0.3, "bland": 0.5, "grainy": 0.2},
         texture="very hard, dry biscuit",
         rarity="common",
@@ -106,7 +106,7 @@ HIGH_FANTASY = [
             "Beorn's famous honey-cakes. Twice-baked, rich with wild honey, "
             "served to guests at his hall."
         ),
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         taste_profile={"sweet": 0.8, "buttery": 0.2},
         texture="crisp exterior, tender crumb",
         rarity="rare",
@@ -134,7 +134,7 @@ HIGH_FANTASY = [
             "Pale golden wine from the vineyards of Dorwinion, favored by "
             "Thranduil's court. Light, aromatic, potent."
         ),
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         taste_profile={
             "fruity": 0.4,
             "floral": 0.3,
@@ -514,7 +514,7 @@ MYTHOLOGICAL = [
 ]
 
 
-ALL_INGREDIENTS = HIGH_FANTASY + SCI_FI + MYTHOLOGICAL
+ALL_INGREDIENTS = FANTASY + SCI_FI + MYTHOLOGICAL
 
 
 if __name__ == "__main__":

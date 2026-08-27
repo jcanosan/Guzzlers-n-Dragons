@@ -62,11 +62,11 @@ class TestIngredients:
 
     async def test_filter_by_theme(self, async_client):
         response = await async_client.get(
-            "/alchemy/ingredients?thematic_group=high_fantasy"
+            "/alchemy/ingredients?thematic_group=fantasy"
         )
         assert response.status_code == 200
         data = response.json()
-        assert all(i["thematic_group"] == "high_fantasy" for i in data)
+        assert all(i["thematic_group"] == "fantasy" for i in data)
 
     async def test_get_by_name_found(self, async_client):
         response = await async_client.get("/alchemy/ingredients/lembas")
@@ -90,7 +90,7 @@ class TestTransform:
                 json={
                     "fictional_ingredient": "lembas",
                     "meal_type": "bread",
-                    "thematic_group": "high_fantasy",
+                    "thematic_group": "fantasy",
                     "constraints": {"servings": 4},
                 },
             )
@@ -117,7 +117,7 @@ class TestTransform:
             json={
                 "fictional_ingredient": "lembas",
                 "meal_type": "bread",
-                "thematic_group": "high_fantasy",
+                "thematic_group": "fantasy",
                 "constraints": {"dietary": [str(i) for i in range(21)]},
             },
         )
@@ -139,7 +139,7 @@ class TestTransform:
                 json={
                     "fictional_ingredient": "lembas",
                     "meal_type": "bread",
-                    "thematic_group": "high_fantasy",
+                    "thematic_group": "fantasy",
                 },
             )
             assert response.status_code == 504

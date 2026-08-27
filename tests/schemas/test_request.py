@@ -36,7 +36,7 @@ class TestAlchemyRequest:
         request = AlchemyRequest(
             fictional_ingredient="lembas",
             meal_type="bread",
-            thematic_group="high_fantasy",
+            thematic_group="fantasy",
         )
         assert request.fictional_ingredient == "lembas"
         assert isinstance(request.constraints, Constraints)
@@ -58,5 +58,5 @@ class TestAlchemyRequest:
             AlchemyRequest(
                 fictional_ingredient="",
                 meal_type="bread",
-                thematic_group="high_fantasy",
+                thematic_group="fantasy",
             )

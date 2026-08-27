@@ -28,7 +28,7 @@
   - SQL $\to$ Lore & Ingredient profiles.
   - RAG $\to$ Culinary techniques & food science.
   - External APIs $\to$ Nutrition & real-world recipe patterns.
-- **Plausibility**: `Critic` validate against `thematic_group` (high_fantasy, sci_fi, mythological). Prevent anachronisms (e.g., no potatoes in high fantasy).
+- **Plausibility**: `Critic` validate against `thematic_group` (fantasy, sci_fi, mythological). Prevent anachronisms (e.g., no potatoes in fantasy).
 
 ## Constraints & Conventions
 - **Typing**: Strict ty. Type hints on all functions.

@@ -23,7 +23,7 @@ def seed_test_db():
                 db.FictionalIngredientORM(
                     name="lembas",
                     description="Elven waybread",
-                    thematic_group="high_fantasy",
+                    thematic_group="fantasy",
                     texture="cake",
                     rarity="rare",
                     real_world_approximations=[

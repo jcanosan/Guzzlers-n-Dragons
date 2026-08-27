@@ -16,7 +16,7 @@ from src.tools.nutrition import lookup_nutrition
 logger = structlog.get_logger()
 
 THEMATIC_CONSTRAINTS = {
-    "high_fantasy": {
+    "fantasy": {
         "forbidden": [
             "tomato",
             "potato",

@@ -149,7 +149,7 @@ layer swaps.
 ```python
 # Anachronism detection per theme
 THEMATIC_CONSTRAINTS = {
-    "high_fantasy": {
+    "fantasy": {
         "forbidden": ["tomato", "potato", "corn", "chocolate", "chili_pepper"],
         "tech_level": "pre_industrial",
         "allowed_magic": "ingredient_based",

@@ -17,7 +17,7 @@ def basic_request() -> AlchemyRequest:
     return AlchemyRequest(
         fictional_ingredient="lembas",
         meal_type="bread",
-        thematic_group="high_fantasy",
+        thematic_group="fantasy",
         constraints=Constraints(servings=4, max_prep_time_minutes=30),
     )
 

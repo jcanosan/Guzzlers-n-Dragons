@@ -11,7 +11,7 @@ AI recipe alchemist that transforms fictional ingredients (e.g. from books, game
 
 ## Thematic Groups
 
-- **high_fantasy**: Lembas, miruvor, cram, honey-cakes, elven wine
+- **fantasy**: Lembas, miruvor, cram, honey-cakes, elven wine
 - **sci_fi**: Spice melange, Romulan ale, synthehol, gagh, blue milk
 - **mythological**: Ambrosia, nectar, soma, golden apples, mead of poetry
 

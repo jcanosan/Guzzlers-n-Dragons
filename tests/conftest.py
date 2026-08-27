@@ -34,7 +34,7 @@ def fictional_ingredient_data() -> dict:
     return {
         "name": "test_ingredient",
         "description": "A test ingredient",
-        "thematic_group": "high_fantasy",
+        "thematic_group": "fantasy",
         "taste_profile": {"sweet": 0.5, "savory": 0.5},
         "texture": "creamy",
         "rarity": "rare",
