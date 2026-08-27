@@ -33,7 +33,7 @@ CREATOR_SYSTEM_PROMPT = (
     '  "plausibility_notes": ["string"]\n'
     "}\n\n"
     "Rules:\n"
-    "- Respect the thematic group — no modern ingredients in high fantasy\n"
+    "- Respect the thematic group. E.g. no modern ingredients in high fantasy\n"
     "- Use real-world approximations for the fictional ingredient\n"
     "- Instructions must be concrete and cookable\n"
     "- Cooking techniques should match RAG recommendations\n"

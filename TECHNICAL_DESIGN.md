@@ -81,7 +81,7 @@ CREATE TABLE fictional_ingredients (
     id INTEGER PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
     description TEXT,
-    thematic_group TEXT NOT NULL,  -- 'high_fantasy', 'sci_fi', 'mythological'
+    thematic_group TEXT NOT NULL,  -- 'fantasy', 'sci_fi', 'mythological'
     taste_profile TEXT,            -- JSON: sweet/salty/umami/bitter/sour/spicy scores
     texture TEXT,                  -- e.g., 'powder', 'liquid', 'bread-like'
     rarity TEXT,                   -- 'common', 'rare', 'legendary'
