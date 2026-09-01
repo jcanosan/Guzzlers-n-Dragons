@@ -1,3 +1,5 @@
+import re
+
 import structlog
 from sqlalchemy import JSON, Integer, String, Text, create_engine
 from sqlalchemy.engine import Engine
@@ -99,13 +101,22 @@ def get_session() -> Session:
     return factory()
 
 
+def _slugify(name: str) -> str:
+    """Normalize a display name to the seeded snake_case slug.
+
+    DB stores names as slugs ('spice_melange'); let callers pass
+    human-friendly variants ('Spice Melange', 'spice-melange').
+    """
+    return re.sub(r"[^a-z0-9]+", "_", name.strip().lower()).strip("_")
+
+
 def get_ingredient_by_name(name: str) -> FictionalIngredient | None:
     """Fetch a single fictional ingredient by name. Returns None if missing."""
     db = get_session()
     try:
         orm = (
             db.query(FictionalIngredientORM)
-            .filter(FictionalIngredientORM.name == name)
+            .filter(FictionalIngredientORM.name == _slugify(name))
             .first()
         )
         if orm:

@@ -34,6 +34,15 @@ class TestGetIngredientByName:
         assert result is not None
         assert result.name == "test_item"
 
+    def test_found_with_human_readable_name(self):
+        db.seed_fictional_ingredients(
+            [FictionalIngredient(name="spice_melange", **_MINIMAL_ING)]
+        )
+
+        result = db.get_ingredient_by_name("Spice Melange")
+        assert result is not None
+        assert result.name == "spice_melange"
+
     def test_null_fields(self):
         from src.services.database import FictionalIngredientORM
 
