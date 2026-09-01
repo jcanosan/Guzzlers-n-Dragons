@@ -48,14 +48,14 @@ flowchart LR
 
 ## Why these choices
 
-- **LangGraph, not a single chain.** A recipe isn't one LLM call. Splitting generation into Planner → Creator → Critic with a feedback loop makes each stage verifiable and lets the Critic's failures drive re-planning — the loop is the feature.
-- **RAG, not fine-tuning.** Cooking science is broad and updates; retrieval keeps the pipeline adaptable without retraining. ChromaDB stores technique substitution, flavor pairing, and texture/food-chemistry guidance.
-- **Structured lore in SQL.** Ingredients, substitutions, and thematic profiles live as queryable rows, so the agents reason over curated data instead of relying on the model's memory of a fictional universe.
-- **Live data via external APIs.** USDA + Open Food Facts ground nutrition in reality; TheMealDB supplies real-world recipe patterns. The pipeline degrades gracefully when these are unavailable.
+- **LangGraph, not a single chain.** A recipe isn't one LLM call. Splitting generation into Planner → Creator → Critic with a feedback loop makes each stage verifiable and lets the Critic's failures drive re-planning.
+- **RAG, not fine-tuning.** Cooking science is broad and updates continuously. Retrieval keeps the pipeline adaptable without needing to re-train, which is expensive. ChromaDB stores technique substitutions, texture and flavour pairing, and food-chemistry guidance.
+- **Structured lore in SQL.** Ingredients, substitutions, and thematic profiles live as data that can be retrieved fast. Then agents reason over curated data instead of just relying on the model's default memory.
+- **Live data via external APIs.** USDA + Open Food Facts ground nutrition in reality, while TheMealDB supplies real-world recipe patterns. The pipeline degrades gracefully when these are unavailable.
 
 ## Design docs
 
-- [Roadmap](ROADMAP.md) - 12-day development plan
+- [Roadmap](ROADMAP.md) - development plan
 - [Technical Design](TECHNICAL_DESIGN.md) - Detailed architecture, data flow and API contracts
 
 ## Quick Start
