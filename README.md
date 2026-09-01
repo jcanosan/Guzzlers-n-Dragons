@@ -1,6 +1,12 @@
 # Guzzlers-n-Dragons
 
-AI recipe alchemist that transforms fictional ingredients (e.g. from books, games, films...) into plausible, cookable recipes. It aims to respect thematic lore, technology level, and culinary culture while applying real-world food science.
+> AI recipe alchemist: turns fictional ingredients (Lembas, spice melange, ambrosia...) into plausible, cookable recipes that respect thematic lore, technology level, and culinary culture — backed by real-world food science.
+
+[![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?logo=langchain&logoColor=white)](https://www.langchain.com/langgraph)
+[![CI](https://github.com/jcanosan/Guzzlers-n-Dragons/actions/workflows/ci.yml/badge.svg)](https://github.com/jcanosan/Guzzlers-n-Dragons/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Highlights
 
@@ -19,14 +25,33 @@ AI recipe alchemist that transforms fictional ingredients (e.g. from books, game
 
 ## Architecture
 
+A **multi-agent pipeline** orchestrated by LangGraph: the Planner extracts constraints and techniques, the Creator generates a recipe fusing all knowledge sources, and the Critic validates against lore, science, and cookability — feeding back to the Planner when the recipe fails thematic consistency, up to 3 iterations.
+
+```mermaid
+flowchart LR
+    A[FastAPI] --> P[Planner]
+    P --> C[Creator]
+    C --> R[Critic]
+    R -->|"FAIL (≤3 iters)"| P
+    R -->|"PASS"| OUT[Recipe + Report]
+
+    subgraph Knowledge
+        SQL[(SQL<br/>Ingredients & Lore)]
+        RAG[(ChromaDB<br/>Cooking Science)]
+        API[USDA · Open Food Facts<br/>TheMealDB]
+    end
+
+    P -.->|constraints| SQL
+    C -.->|retrieval| RAG
+    C -.->|nutrition| API
 ```
-FastAPI → LangGraph (Planner → Creator → Critic)
-                ↓
-    ┌───────────┼───────────┐
-    ▼           ▼           ▼
-    SQL        RAG        API
-Ingredients  Science    USDA + Open Food Facts + TheMealDB
-```
+
+## Why these choices
+
+- **LangGraph, not a single chain.** A recipe isn't one LLM call. Splitting generation into Planner → Creator → Critic with a feedback loop makes each stage verifiable and lets the Critic's failures drive re-planning — the loop is the feature.
+- **RAG, not fine-tuning.** Cooking science is broad and updates; retrieval keeps the pipeline adaptable without retraining. ChromaDB stores technique substitution, flavor pairing, and texture/food-chemistry guidance.
+- **Structured lore in SQL.** Ingredients, substitutions, and thematic profiles live as queryable rows, so the agents reason over curated data instead of relying on the model's memory of a fictional universe.
+- **Live data via external APIs.** USDA + Open Food Facts ground nutrition in reality; TheMealDB supplies real-world recipe patterns. The pipeline degrades gracefully when these are unavailable.
 
 ## Design docs
 
