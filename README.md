@@ -25,7 +25,7 @@ FastAPI → LangGraph (Planner → Creator → Critic)
     ┌───────────┼───────────┐
     ▼           ▼           ▼
     SQL        RAG        API
-Ingredients  Science    USDA + TheMealDB
+Ingredients  Science    USDA + Open Food Facts + TheMealDB
 ```
 
 ## Design docs
@@ -49,14 +49,14 @@ uv sync
 # Copy environment file and add your API keys
 cp .env.example .env
 
-# Seed the DB with fictional ingredients, real ingredients, and recipe patterns
+# Seed the DB (ingredients + patterns) and ingest cooking science into Chroma
 PYTHONPATH=. uv run python scripts/run_seeds.py
 
 # Run the API server
 uv run uvicorn src.main:app --reload
 ```
 
-API available at `http://localhost:8000` with docs at `http://localhost:8000/docs`.
+API available at `http://localhost:8000`. Interactive docs (`/docs`, `/redoc`) are enabled only when `DEBUG=true` (`.env.example` sets `DEBUG=false`).
 
 ## Docker
 

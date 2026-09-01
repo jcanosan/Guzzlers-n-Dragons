@@ -6,7 +6,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FastAPI Layer                            │
 │  POST /alchemy/transform    GET /alchemy/ingredients            │
-│  GET /health                                                    │
+│  GET /alchemy/ingredients/{name}    GET /health                 │
 └──────────────────────────────┬──────────────────────────────────┘
                                │
                                ▼
@@ -59,7 +59,7 @@
 
 - **Input**: AlchemyRequest (ingredient, meal_type, theme, constraints)
 - **Output**: PlannerResult (technique_requirements, flavor_profile, texture_goals, constraint_summary, knowledge_queries)
-- **Tools**: SQL ingredient lookup, constraint analyzer
+- **Tools**: SQL ingredient + recipe-pattern lookup, RAG technique retrieval (constraint extraction via LLM)
 
 ### Creator Agent
 
@@ -113,10 +113,10 @@ CREATE TABLE recipe_patterns (
 
 ### RAG Knowledge Base (ChromaDB)
 
-- **Collections**: `cooking_techniques`, `flavor_pairings`, `substitution_rules`, `food_science`
-- **Chunking**: ~500 tokens with 50-token overlap
-- **Embedding**: `BAAI/bge-small-en-v1.5`
-- **Metadata**: `source`, `category`, `technique_type`, `difficulty`
+- **Collection**: single `cooking_science` collection; documents split on `## ` headings,
+  with large sections chunked to ~1000 chars and 200-char overlap
+- **Embedding**: `BAAI/bge-small-en-v1.5` (FastEmbed, in-process)
+- **Metadata**: `source`, `topic` (filename stem), `section`, `chunk`
 
 ### External API Integration
 
@@ -125,11 +125,11 @@ is accessed via a plain `httpx` async client. Agent-facing tools are declared
 with LangChain's `@tool` decorator — same semantics as MCP (name, description,
 structured schema), but without the MCP wire protocol.
 
-- **USDA FoodData Central**: Nutrition lookup, allergen data
+- **USDA FoodData Central**: Nutrition lookup (food search + detail)
+- **Open Food Facts**: Fallback nutrition source, no API key needed
 - **TheMealDB Wrapper**:
   - Normalizes API responses to pattern format
-  - Extracts: techniques by ingredient, common pairings, meal type distributions
-  - Caches locally to reduce API calls
+  - Extracts: techniques by ingredient, ingredient pairings, and category/area
 
 #### Future: Standalone MCP servers
 
@@ -185,8 +185,8 @@ THEMATIC_CONSTRAINTS = {
   else the raw name as a last resort.
 - Nutrition lookup chains USDA → Open Food Facts → seeded DB (`lookup_nutrition`).
 - Approximated lookups are flagged in the report notes as `(approx: <term>)`.
-- When every source misses, the estimate returns no macros with
-  `source: "unavailable"` and a "No real ingredients found for analysis" note.
+- When every source misses, the estimate returns no macros with a
+  "No real ingredients found for analysis" note.
 
 ## API Contract
 
@@ -225,16 +225,25 @@ THEMATIC_CONSTRAINTS = {
   "plausibility_report": {
     "thematic_consistency": "PASS|WARN|FAIL",
     "notes": [...],
-    "substitutions": [{"for": "...", "options": [...]}],
-    "nutrition_estimate": {"calories_per_serving": 22, "notes": "Source: usda (approx: <term>)"},
-    "validation_issues": [...]
+    "substitutions": [],
+    "nutrition_estimate": {
+      "calories_per_serving": 22,
+      "protein_g": 3.2,
+      "carbs_g": 0.5,
+      "fat_g": 0.1,
+      "notes": "Source: usda (approx: <term>)"
+    },
+    "validation_issues": [{"type": "...", "severity": "HIGH", "message": "...", "suggestion": "..."}]
   },
   "metadata": {
-    "processing_time_ms": 1234,
-    "agent_trace_id": "langsmith-trace-uuid"
+    "iterations": 1,
+    "ingredient": "spice melange"
   }
 }
 ```
+
+Note: `substitutions` is present in the response schema but the Critic does not
+currently populate it — it is always `[]`.
 
 ## Tech Stack Justification
 
@@ -242,13 +251,13 @@ THEMATIC_CONSTRAINTS = {
 | ------------- | ------------------- | ----------------------------------------------- |
 | API           | FastAPI             | Async, auto-docs, type-safe, production-ready   |
 | Orchestration | LangGraph           | Explicit state graph, supports validation loops |
-| LLM           | TBD                 | Cost/quality balance for creative generation    |
+| LLM           | Ollama (`gemma4:31b-cloud`) | Local/cloud LLM for creative generation     |
 | SQL           | SQLite + SQLAlchemy | Zero-config, portable, ACID                     |
 | Vector DB     | ChromaDB            | Local, persistent, good LangChain integration   |
 | External APIs | USDA + TheMealDB    | Live nutrition + real recipe patterns           |
 | Validation    | Pydantic + custom   | Type-safe at boundaries, domain logic separate  |
 | Deploy        | Railway (Docker)    | Free tier, GitHub CI/CD, auto-deploy            |
-| Observability | LangSmith           | Trace agent reasoning for demos                 |
+| Observability | structlog           | JSON structured logging                         |
 
 ### CORS Configuration
 
@@ -265,23 +274,23 @@ CORS is configured via the `CORS_ORIGINS` environment variable.
 
 ### Railway
 
-The project includes a `docker/Dockerfile` that Railway auto-detects on deploy.
+The project includes a `docker/Dockerfile`; `railway.json` points Railway at it.
 
 **Required environment variables** (set in Railway dashboard):
 
 | Variable | Example | Notes |
 |---|---|---|
 | `LLM_MODEL` | `gemma4:31b-cloud` | Must resolve to a reachable Ollama instance |
-| `OLLAMA_BASE_URL` | `https://your-ollama-instance.com` | See Ollama Cloud docs |
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama base URL (default); `https://api.ollama.com` for Ollama Cloud |
+| `OLLAMA_API_KEY` | `your_api_key` | Required for Ollama Cloud; leave empty for a local Ollama |
 | `CORS_ORIGINS` | `["https://app.example.com"]` | Your frontend's deployed origin |
-| `DEBUG` | `false` | Disables debug endpoints in production |
+| `DEBUG` | `false` | Disables `/docs` and `/redoc` when false |
 
 **Optional environment variables:**
 
 | Variable | What it enables |
 |---|---|
 | `USDA_API_KEY` | USDA nutrition lookups (api.data.gov) |
-| `LANGSMITH_API_KEY` | LangSmith tracing for agent observability |
 | `SQL_ECHO` | SQLAlchemy statement logging (dev only) |
 
 **Deploy steps:**

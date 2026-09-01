@@ -26,6 +26,7 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 ### Phase 3: External API Integration (Day 5)
 
 - [x] USDA FoodData Central API client (httpx, async)
+- [x] Open Food Facts API client (httpx, async, fallback source)
 - [x] TheMealDB API client (httpx, async)
 - [x] Agent tools via LangChain @tool decorator (agent-discoverable, schema-validated)
 - [x] Tools: nutrition lookup, recipe pattern extraction, technique aggregation
@@ -37,12 +38,12 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 - [x] Planner Agent. Constraint extraction, technique identification
 - [x] Creator Agent. Recipe generation with knowledge fusion
 - [x] Critic Agent. Validation (lore, science, cookability)
-- [x] Tests: agent unit tests per agent (6 tests, mocked LLM)
+- [x] Tests: agent unit tests per agent (8 tests, mocked LLM)
 
 ### Phase 5: Output & API
 
 - [x] Structured JSON output (recipe + plausibility report)
-- [x] FastAPI endpoints, error handling, LangSmith tracing
+- [x] FastAPI endpoints, error handling
 - [x] Tests: API route integration tests
 
 ### Phase 6: Polish & Deploy
