@@ -1,6 +1,6 @@
 # Guzzlers-n-Dragons
 
-> AI recipe alchemist: turns fictional ingredients (Lembas, spice melange, ambrosia...) into plausible, cookable recipes that respect thematic lore, technology level, and culinary culture — backed by real-world food science.
+> AI recipe alchemist: turns fictional ingredients (Lembas, spice melange, ambrosia...) into plausible, cookable recipes. These aim to respect thematic lore, technology level, and culinary culture; all backed by real-world food science.
 
 [![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -25,25 +25,30 @@
 
 ## Architecture
 
-A **multi-agent pipeline** orchestrated by LangGraph: the Planner extracts constraints and techniques, the Creator generates a recipe fusing all knowledge sources, and the Critic validates against lore, science, and cookability — feeding back to the Planner when the recipe fails thematic consistency, up to 3 iterations.
+A **multi-agent pipeline** orchestrated by LangGraph:
+1. The **Planner** extracts constraints and techniques.
+2. The **Creator** generates a recipe fusing all knowledge sources.
+3. The **Critic** validates against lore, science, and cookability. Feeds back to the Planner when the recipe fails thematic consistency, up to 3 iterations.
 
 ```mermaid
 flowchart LR
     A[FastAPI] --> P[Planner]
     P --> C[Creator]
     C --> R[Critic]
-    R -->|"FAIL (≤3 iters)"| P
+    R -->|"FAIL (<3 iters)"| P
     R -->|"PASS"| OUT[Recipe + Report]
 
     subgraph Knowledge
         SQL[(SQL<br/>Ingredients & Lore)]
         RAG[(ChromaDB<br/>Cooking Science)]
-        API[USDA · Open Food Facts<br/>TheMealDB]
+        NtrAPI[USDA · Open Food Facts]
+        RcpAPI[TheMealDB]
     end
 
     P -.->|constraints| SQL
     C -.->|retrieval| RAG
-    C -.->|nutrition| API
+    C -.->|nutrition| NtrAPI
+    C -.->|recipe<br/>patterns| RcpAPI
 ```
 
 ## Why these choices
@@ -82,6 +87,18 @@ uv run uvicorn src.main:app --reload
 ```
 
 API available at `http://localhost:8000`. Interactive docs (`/docs`, `/redoc`) are enabled only when `DEBUG=true` (`.env.example` sets `DEBUG=false`).
+
+## Try the demo
+
+One-shot CLI run of the Planner → Creator → Critic pipeline. No need to run the server:
+
+```bash
+PYTHONPATH=. uv run python scripts/demo.py --ingredient "spice melange" --theme sci_fi --meal-type beverage
+```
+
+![demo run](examples/demo.gif)
+
+Sample output: [examples/demo-output.txt](examples/demo-output.txt)
 
 ## Docker
 
