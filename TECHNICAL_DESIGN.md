@@ -122,8 +122,7 @@ CREATE TABLE recipe_patterns (
 
 Currently, each external data source (USDA, Open Food Facts, TheMealDB)
 is accessed via a plain `httpx` async client. Agent-facing tools are declared
-with LangChain's `@tool` decorator — same semantics as MCP (name, description,
-structured schema), but without the MCP wire protocol.
+with LangChain's `@tool` decorator.
 
 - **USDA FoodData Central**: Nutrition lookup (food search + detail)
 - **Open Food Facts**: Fallback nutrition source, no API key needed
@@ -131,19 +130,7 @@ structured schema), but without the MCP wire protocol.
   - Normalizes API responses to pattern format
   - Extracts: techniques by ingredient, ingredient pairings, and category/area
 
-#### Future: Standalone MCP servers
-
-Each data source will become its own MCP server in a separate repository:
-
-```
-usda-mcp-server/       ← stdio JSON-RPC server wrapping USDA REST API
-off-mcp-server/        ← stdio JSON-RPC server wrapping Open Food Facts API
-```
-
-This project will then load them via `langchain-mcp-adapters.load_mcp_tools()`
-instead of importing the HTTP clients directly. The `nutrition.py` orchestration
-layer and `agent_tools.py` @tool wrappers survive unchanged — only the transport
-layer swaps.
+Eventually, MCP integrations are planned.
 
 ## Validation System
 
@@ -242,8 +229,7 @@ THEMATIC_CONSTRAINTS = {
 }
 ```
 
-Note: `substitutions` is present in the response schema but the Critic does not
-currently populate it — it is always `[]`.
+Note: as of now, `substitutions` is present in the response schema but the Critic does not currently populate it.
 
 ## Tech Stack Justification
 
@@ -267,7 +253,7 @@ CORS is configured via the `CORS_ORIGINS` environment variable.
 - **Default**: `["http://localhost:5173"]` (Vite dev server).
 - **Production**: Set to your deployed frontend URL(s), e.g.
   `["https://app.example.com"]`.
-- **Security**: `allow_credentials=True` requires explicit origins — do NOT use
+- **Security**: `allow_credentials=True` requires explicit origins. Do NOT use
   `["*"]` in production.
 
 ## Deployment
