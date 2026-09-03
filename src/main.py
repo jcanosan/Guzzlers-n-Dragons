@@ -20,8 +20,16 @@ logger = structlog.get_logger()
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to every response.
 
-    TODO: HSTS left commented. Uncomment only when TLS terminates in front
-    of the app (Cloudflare, Railway TLS proxy, etc.).
+    - X-Content-Type-Options: nosniff — stop browsers from MIME-sniffing
+      JSON/HTML responses into scripts.
+    - X-Frame-Options: DENY — block clickjacking; no page here is meant
+      to be framed.
+    - Referrer-Policy: strict-origin-when-cross-origin — keep the URL out
+      of external requests, still send origin on HTTPS-to-HTTPS.
+    - Permissions-Policy — disable camera/mic/geolocation we never use.
+    - Strict-Transport-Security: max-age=31536000 — browsers honor HSTS
+      only over a secure connection, so setting it unconditionally is
+      harmless on plain HTTP and removes a spoofable trust boundary.
     """
 
     async def dispatch(self, request, call_next):
@@ -32,9 +40,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = (
             "camera=(), microphone=(), geolocation=()"
         )
-        # response.headers["Strict-Transport-Security"] = (
-        #     "max-age=31536000; includeSubDomains"
-        # )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000"
         return response
 
 
