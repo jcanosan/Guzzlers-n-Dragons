@@ -20,7 +20,7 @@ logger = structlog.get_logger()
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to every response.
 
-    HSTS left commented — uncomment only when TLS terminates in front
+    TODO: HSTS left commented. Uncomment only when TLS terminates in front
     of the app (Cloudflare, Railway TLS proxy, etc.).
     """
 

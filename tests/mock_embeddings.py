@@ -1,4 +1,4 @@
-"""Mock embedding function for tests — avoids FastEmbed model download in CI."""
+"""Mock embedding function for tests. Avoids FastEmbed model download in CI."""
 
 from langchain_core.embeddings import Embeddings
 
@@ -8,7 +8,7 @@ VECTOR_SIZE = 384
 class MockEmbeddings(Embeddings):
     """Returns all-zero vectors. Good enough for testing retrieval logic.
 
-    Accepts any kwargs to replace FastEmbedEmbeddings — model name,
+    Accepts any kwargs to replace FastEmbedEmbeddings. Model name,
     configuration, etc. are all silently ignored.
     """
 

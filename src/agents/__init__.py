@@ -1,1 +1,1 @@
-"""Agent system — Planner → Creator → Critic graph."""
+"""Agent system: Planner → Creator → Critic graph."""

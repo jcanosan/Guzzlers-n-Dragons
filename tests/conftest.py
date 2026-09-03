@@ -11,7 +11,7 @@ from tests.mock_embeddings import MockEmbeddings
 def mock_embeddings():
     """Replace FastEmbedEmbeddings with all-zero vectors across all tests.
 
-    Keeps the test suite offline — no model download, no HF Hub calls.
+    Keeps the test suite offline: no model download, no HF Hub calls.
     Applied once per session.
     """
     # Import if not already loaded (settings tests run before vector store)

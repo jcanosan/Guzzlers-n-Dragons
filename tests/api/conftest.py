@@ -1,4 +1,4 @@
-"""API test fixtures — seeds in-memory DB for route integration tests."""
+"""API test fixtures. Seeds in-memory DB for route integration tests."""
 
 import pytest
 from sqlalchemy.pool import StaticPool
