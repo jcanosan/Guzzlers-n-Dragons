@@ -115,6 +115,7 @@ docker compose -f docker/docker-compose.yml --profile testing run test
 | Method | Endpoint                      | Description                                |
 | ------ | ----------------------------- | ------------------------------------------ |
 | POST   | `/alchemy/transform`          | Transform fictional ingredient into recipe |
+| POST   | `/alchemy/transform/stream`   | Stream the agent pipeline as SSE events    |
 | GET    | `/alchemy/ingredients`        | List all fictional ingredients             |
 | GET    | `/alchemy/ingredients/{name}` | Get ingredient details                     |
 | GET    | `/health`                     | Health check                               |

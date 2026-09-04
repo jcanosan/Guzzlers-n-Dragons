@@ -1,11 +1,16 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from src.api.routes import limiter
 from src.api.routes import router as alchemy_router
 from src.config.logging import configure_logging
 from src.config.settings import settings
@@ -15,6 +20,15 @@ from src.services.vector_store import vector_store
 configure_logging()
 
 logger = structlog.get_logger()
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+
+async def rate_limit_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Return a 429 for slowapi RateLimitExceeded errors."""
+    return JSONResponse(
+        status_code=429, content={"detail": "Rate limit exceeded"}
+    )
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -79,25 +93,19 @@ app.add_middleware(
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+app.add_middleware(SlowAPIMiddleware)
+
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "guzzlers-n-dragons"}
 
 
-@app.get("/")
+@app.get("/", response_class=FileResponse)
 async def root():
-    return {
-        "name": "Guzzlers-n-Dragons",
-        "description": "Transform fictional ingredients into plausible recipes",
-        "version": "0.1.0",
-        "docs": "/docs",
-        "endpoints": {
-            "transform": "/alchemy/transform",
-            "ingredients": "/alchemy/ingredients",
-            "health": "/health",
-        },
-    }
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 app.include_router(alchemy_router, prefix="/alchemy", tags=["alchemy"])

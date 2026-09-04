@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guzzlers-n-Dragons — Recipe Alchemist</title>
+  <style>
+    :root {
+      --bg: #12181f;
+      --panel: #1c2a33;
+      --border: #2c3e4a;
+      --text: #e8edf2;
+      --muted: #9fb3c8;
+      --accent: #e8d5a0;
+      --good: #7fbf7f;
+      --bad: #d97b7b;
+      --warn: #d9c27b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+    header { margin-bottom: 24px; }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 28px;
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+    header p { margin: 0; color: var(--muted); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    form { display: grid; gap: 14px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    input, select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #0f151b;
+      color: var(--text);
+      font-size: 14px;
+    }
+    button {
+      padding: 11px 18px;
+      border: none;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #1a1408;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .trace {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .node {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      background: #0f151b;
+    }
+    .node .title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .node .state { font-size: 12px; color: var(--muted); }
+    .node.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+    .node.active .state { color: var(--accent); }
+    .node.done { border-color: var(--good); }
+    .node.done .state { color: var(--good); }
+    .node.failed { border-color: var(--bad); }
+    .node.failed .state { color: var(--bad); }
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin: 2px 4px 2px 0;
+    }
+    .pill.active { color: var(--accent); border-color: var(--accent); }
+    h2 { font-size: 18px; margin: 0 0 12px; color: var(--accent); }
+    h3 { font-size: 15px; margin: 14px 0 6px; }
+    ul, ol { margin: 4px 0; padding-left: 20px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+    }
+    .badge.PASS { background: rgba(127,191,127,0.15); color: var(--good); }
+    .badge.WARN { background: rgba(217,194,123,0.15); color: var(--warn); }
+    .badge.FAIL { background: rgba(217,123,123,0.15); color: var(--bad); }
+    .issue { color: var(--bad); font-size: 13px; }
+    .hidden { display: none; }
+    .error {
+      border: 1px solid var(--bad);
+      color: var(--bad);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    #result .recipe-body { white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Guzzlers-n-Dragons</h1>
+      <p>AI recipe alchemist: turn fictional ingredients into plausible, cookable recipes.</p>
+    </header>
+
+    <section class="card">
+      <form id="transform-form">
+        <div class="row">
+          <div>
+            <label for="ingredient">Fictional ingredient</label>
+            <input id="ingredient" name="fictional_ingredient" list="ingredients" required
+                   value="spice melange" />
+            <datalist id="ingredients"></datalist>
+          </div>
+          <div>
+            <label for="theme">Thematic group</label>
+            <select id="theme" name="thematic_group">
+              <option value="fantasy">Fantasy</option>
+              <option value="sci_fi" selected>Sci-fi</option>
+              <option value="mythological">Mythological</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="meal">Meal type</label>
+            <input id="meal" name="meal_type" value="beverage" />
+          </div>
+          <div>
+            <label for="servings">Servings</label>
+            <input id="servings" name="servings" type="number" min="1" max="50" value="4" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="dietary">Dietary (comma-separated)</label>
+            <input id="dietary" name="dietary" placeholder="vegetarian, vegan..." />
+          </div>
+          <div>
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" name="difficulty">
+              <option value="">Any</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <button id="run-btn" type="submit">Transform</button>
+      </form>
+    </section>
+
+    <div id="error" class="error hidden"></div>
+
+    <section class="card hidden" id="trace-card">
+      <h2>Agent pipeline</h2>
+      <div id="iterations"></div>
+      <div class="trace" id="trace">
+        <div class="node" id="node-planner">
+          <div class="title">Planner</div>
+          <div class="state">idle</div>
+        </div>
+        <div class="node" id="node-creator">
+          <div class="title">Creator</div>
+          <div class="state">idle</div>
+        </div>
+        <div class="node" id="node-critic">
+          <div class="title">Critic</div>
+          <div class="state">idle</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="result">
+      <h2>Recipe</h2>
+      <div id="result-body" class="recipe-body"></div>
+    </section>
+  </div>
+
+  <script>
+    const NODE_TITLES = { planner: "Planner", creator: "Creator", critic: "Critic" };
+    const NODE_ORDER = ["planner", "creator", "critic"];
+    const MAX_ITERATIONS = 3;
+
+    async function loadIngredients() {
+      try {
+        const res = await fetch("/alchemy/ingredients");
+        const items = await res.json();
+        const dl = document.getElementById("ingredients");
+        items.forEach((i) => {
+          const opt = document.createElement("option");
+          opt.value = i.name;
+          dl.appendChild(opt);
+        });
+      } catch (e) { /* datalist is a nicety */ }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById("error");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+
+    function setNode(node, cls, text) {
+      const el = document.getElementById("node-" + node);
+      el.className = "node " + cls;
+      el.querySelector(".state").textContent = text;
+    }
+
+    function addIterationPill(n) {
+      const box = document.getElementById("iterations");
+      const pill = document.createElement("span");
+      pill.className = "pill active";
+      pill.textContent = "iteration " + n;
+      box.appendChild(pill);
+    }
+
+    function render(draft, report, iterations) {
+      const body = document.getElementById("result-body");
+      const parts = [];
+
+      if (draft) {
+        parts.push("<h3>" + escapeHtml(draft.name) + "</h3>");
+        parts.push('<p class="muted">' + escapeHtml(draft.description || "") + "</p>");
+        parts.push("<p class='muted'>servings: " + (draft.servings || "?") +
+          " | prep " + (draft.prep_time_minutes || 0) + " min | cook " +
+          (draft.cook_time_minutes || 0) + " min | " + (draft.difficulty || "?") + "</p>");
+
+        const ing = draft.ingredients || [];
+        if (ing.length) {
+          parts.push("<h3>Ingredients</h3><ul>");
+          ing.forEach((i) => parts.push("<li>" + escapeHtml(
+            (i.amount || "") + " " + (i.item || "") +
+            (i.notes ? " — " + i.notes : "")) + "</li>"));
+          parts.push("</ul>");
+        }
+
+        const steps = draft.instructions || [];
+        if (steps.length) {
+          parts.push("<h3>Instructions</h3><ol>");
+          steps.forEach((s) => parts.push("<li>" + escapeHtml(s) + "</li>"));
+          parts.push("</ol>");
+        }
+      }
+
+      if (report) {
+        const verdict = report.thematic_consistency || "?";
+        parts.push("<h3>Plausibility report</h3>");
+        parts.push('<span class="badge ' + verdict + '">' + verdict + "</span>");
+
+        const nut = report.nutrition_estimate || {};
+        if (nut.notes) parts.push('<p class="muted">nutrition: ' + escapeHtml(nut.notes) + "</p>");
+
+        (report.validation_issues || []).forEach((issue) => {
+          parts.push('<p class="issue">' + escapeHtml(
+            (issue.severity || "") + ": " + (issue.message || "") +
+            (issue.suggestion ? " — " + issue.suggestion : "")) + "</p>");
+        });
+      }
+
+      if (iterations) {
+        parts.push('<p class="muted">agent iterations: ' + iterations + "</p>");
+      }
+
+      body.innerHTML = parts.join("");
+      document.getElementById("result").classList.remove("hidden");
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s == null ? "" : String(s);
+      return d.innerHTML;
+    }
+
+    async function runTransform(form) {
+      const payload = {
+        fictional_ingredient: form.fictional_ingredient,
+        meal_type: form.meal_type,
+        thematic_group: form.thematic_group,
+        constraints: {
+          servings: parseInt(form.servings, 10) || 4,
+          dietary: (form.dietary || "").split(",").map((s) => s.trim()).filter(Boolean),
+          difficulty: form.difficulty || null,
+        },
+      };
+
+      document.getElementById("error").classList.add("hidden");
+      document.getElementById("result").classList.add("hidden");
+      document.getElementById("trace-card").classList.remove("hidden");
+      document.getElementById("iterations").innerHTML = "";
+      NODE_ORDER.forEach((n) => setNode(n, "", "idle"));
+      document.getElementById("run-btn").disabled = true;
+
+      let draft = null, report = null, iterations = 0, ptr = 0;
+      addIterationPill(1);
+      setNode(NODE_ORDER[0], "active", "running…");
+
+      const handleEnd = (node, data) => {
+        setNode(node, "done", "done");
+        if (node === "planner") iterations = data.iteration || iterations;
+        if (node === "critic") {
+          const verdict = (data.report || {}).thematic_consistency;
+          if (verdict === "FAIL" && iterations < MAX_ITERATIONS) {
+            ptr = 0;
+            addIterationPill(iterations + 1);
+            setNode("planner", "active", "running…");
+          }
+        } else {
+          ptr++;
+          if (ptr < NODE_ORDER.length) {
+            setNode(NODE_ORDER[ptr], "active", "running…");
+          }
+        }
+      };
+
+      try {
+        const res = await fetch("/alchemy/transform/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok || !res.body) {
+          const detail = await res.json().catch(() => ({}));
+          throw new Error(detail.detail || ("HTTP " + res.status));
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf("\n\n")) !== -1) {
+            const raw = buf.slice(0, idx);
+            buf = buf.slice(idx + 2);
+            const lines = raw.split("\n");
+            const evt = (lines.find((l) => l.startsWith("event:")) || "").slice(6).trim();
+            const dataLine = lines.filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("\n");
+            if (!dataLine) continue;
+            let data;
+            try { data = JSON.parse(dataLine); } catch (e) { continue; }
+
+            if (evt === "node") {
+              if (data.stage === "end") {
+                if (data.node === "creator") draft = data.data.draft_recipe;
+                if (data.node === "critic") report = data.data.report;
+                handleEnd(data.node, data.data);
+              }
+            } else if (evt === "error") {
+              throw new Error(data.message || "pipeline failed");
+            } else if (evt === "done") {
+              render(draft, report, iterations);
+            }
+          }
+        }
+      } catch (e) {
+        showError(e.message || String(e));
+        setNode("critic", "failed", "failed");
+      } finally {
+        document.getElementById("run-btn").disabled = false;
+      }
+    }
+
+    document.getElementById("transform-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      runTransform(Object.fromEntries(form.entries()));
+    });
+
+    loadIngredients();
+  </script>
+</body>
+</html>

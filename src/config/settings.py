@@ -39,6 +39,12 @@ class Settings(BaseSettings):
         default=300, alias="AGENT_TIMEOUT_SECONDS"
     )
 
+    # Rate limiting
+    rate_limit_enabled: bool = Field(
+        default=False, alias="RATE_LIMIT_ENABLED"
+    )
+    rate_limit: str = Field(default="10/minute", alias="RATE_LIMIT")
+
     # LLM
     llm_model: str = Field(default="gemma4:31b-cloud", alias="LLM_MODEL")
     llm_temperature: float = Field(default=0.7, alias="LLM_TEMPERATURE")
