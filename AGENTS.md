@@ -1,7 +1,7 @@
 # Agent Instructions: Guzzlers-n-Dragons
 
 ## Documentation
-- [Roadmap](ROADMAP.md) - 12-day dev plan
+- [Roadmaps](roadmap/) - project, demo, and evaluation plans
 - [Readme](README.md) - Explanation on this project and how to set it up
 - [Technical Design](TECHNICAL_DESIGN.md) - Detailed architecture, data flow, API contracts
 

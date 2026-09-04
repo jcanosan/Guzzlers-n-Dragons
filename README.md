@@ -60,7 +60,7 @@ flowchart LR
 
 ## Design docs
 
-- [Roadmap](ROADMAP.md) - development plan
+- [Roadmaps](roadmap/) - project, demo, and evaluation plans
 - [Technical Design](TECHNICAL_DESIGN.md) - Detailed architecture, data flow and API contracts
 
 ## Quick Start
