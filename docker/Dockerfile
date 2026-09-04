@@ -10,7 +10,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 COPY pyproject.toml uv.lock* ./
 
 # Install dependencies
-RUN uv sync --frozen --no-dev
+# Retry loop + lower concurrency
+RUN for i in 1 2 3 4 5; do \
+        UV_CONCURRENT_DOWNLOADS=8 uv sync --frozen --no-dev && exit 0; \
+        echo "uv sync attempt $i failed, retrying..."; \
+    done; exit 1
 
 # Test build stage
 FROM python:3.14-slim AS builder-test
@@ -19,7 +23,10 @@ WORKDIR /app
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 COPY pyproject.toml uv.lock* ./
-RUN uv sync --frozen --extra dev
+RUN for i in 1 2 3 4 5; do \
+        UV_CONCURRENT_DOWNLOADS=8 uv sync --frozen --extra dev && exit 0; \
+        echo "uv sync attempt $i failed, retrying..."; \
+    done; exit 1
 
 # Test stage
 FROM python:3.14-slim AS test
