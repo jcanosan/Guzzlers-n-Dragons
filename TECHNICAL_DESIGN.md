@@ -5,8 +5,8 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FastAPI Layer                            │
-│  POST /alchemy/transform    GET /alchemy/ingredients            │
-│  GET /alchemy/ingredients/{name}    GET /health                 │
+│  POST /alchemy/transform[/stream]  GET /alchemy/ingredients     │
+│  GET /alchemy/ingredients/{name}    GET /health    GET / (page)  │
 └──────────────────────────────┬──────────────────────────────────┘
                                │
                                ▼
@@ -231,6 +231,55 @@ THEMATIC_CONSTRAINTS = {
 
 Note: as of now, `substitutions` is present in the response schema but the Critic does not currently populate it.
 
+### POST /alchemy/transform/stream
+
+Same request body as `/alchemy/transform`. Responds with
+`text/event-stream` (Server-Sent Events) while the pipeline runs via
+`agent_graph.astream(stream_mode="updates")`.
+
+Events, in order:
+
+| Event  | Payload `data`                                                              |
+| ------ | --------------------------------------------------------------------------- |
+| `node` | `{"node": "planner"\|"creator"\|"critic", "stage": "end", "data": {...}}`    |
+| `done` | `{}` — emitted after the last `node` event on success                        |
+| `error`| `{"message": "..."}` — on timeout or pipeline failure                        |
+
+The `node` event's `data` is a curated payload per stage:
+
+- `planner` → `{"iteration": <int>, "planner_result": {...}}`
+- `creator` → `{"draft_recipe": {...}}`
+- `critic` → `{"report": {...}}` (same shape as `plausibility_report` above)
+
+The graph is sequential, so clients infer the running stage from completion
+order; there are no `*_start` events. The whole stream is bounded by
+`AGENT_TIMEOUT_SECONDS` (default 300).
+
+### Rate limiting
+
+Both transform endpoints are wrapped with `slowapi` (keyed by client IP).
+Gated by settings:
+
+- `RATE_LIMIT_ENABLED` (default `false`) — when false, no limit is applied.
+- `RATE_LIMIT` (default `"10/minute"`) — slowapi limit string.
+
+When the limit is hit, a global handler returns `429` with
+`{"detail": "Rate limit exceeded"}`.
+
+### Root page and security headers
+
+`GET /` serves `src/static/index.html`: a demo form (ingredient, meal type,
+theme, constraints) with a live agent-trace panel that renders the SSE stream
+from `/alchemy/transform/stream`. This replaces the earlier JSON root
+response.
+
+`SecurityHeadersMiddleware` adds to every response: `X-Content-Type-Options:
+nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy:
+strict-origin-when-cross-origin`, `Permissions-Policy` disabling
+camera/microphone/geolocation, and `Strict-Transport-Security:
+max-age=31536000` (set unconditionally; browsers honor HSTS only over secure
+connections, so this is harmless on plain HTTP).
+
 ## Tech Stack Justification
 
 | Layer         | Choice              | Rationale                                       |
@@ -278,6 +327,7 @@ The project includes a `docker/Dockerfile`; `railway.json` points Railway at it.
 |---|---|
 | `USDA_API_KEY` | USDA nutrition lookups (api.data.gov) |
 | `SQL_ECHO` | SQLAlchemy statement logging (dev only) |
+| `RATE_LIMIT_ENABLED` / `RATE_LIMIT` | Rate limiting on transform endpoints (default off / `10/minute`) |
 
 **Deploy steps:**
 1. Push to GitHub

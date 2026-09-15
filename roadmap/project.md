@@ -50,21 +50,13 @@ AI recipe alchemist: transform fictional ingredients into cookable recipes with 
 
 - [x] Integration + e2e tests, CI/CD (GitHub Actions)
 - [x] Railway deploy
-- [ ] Showcase demo, architecture diagram
-
-## Milestones
-
-- **M1** (Day 2): Ingredient DB operational, basic API skeleton
-- **M2** (Day 5): Full knowledge pipeline (SQL + RAG + External APIs) working
-- **M3** (Day 8): Agent loop functional end-to-end
-- **M4** (Day 10): API complete, validated outputs
-- **M5** (Day 12): Deployed, documented, demo-ready
+- [x] Showcase demo, architecture diagram
 
 ## Success Criteria
 
-- [ ] Transform 3+ fictional ingredients across all themes
-- [ ] Output passes critic validation (lore + science + cookability)
-- [ ] Substitutions are practical and explained
-- [ ] API respond < 5s for typical requests
-- [ ] 80%+ test coverage on core logic
-- [ ] Clean ruff/ty on all source files
+- Transform 3+ fictional ingredients across all themes
+- Output passes critic validation (lore + science + cookability)
+- Substitutions are practical and explained
+- API respond < 5s for typical requests
+- 80%+ test coverage on core logic
+- Clean ruff/ty on all source files
