@@ -40,9 +40,7 @@ class Settings(BaseSettings):
     )
 
     # Rate limiting
-    rate_limit_enabled: bool = Field(
-        default=False, alias="RATE_LIMIT_ENABLED"
-    )
+    rate_limit_enabled: bool = Field(default=False, alias="RATE_LIMIT_ENABLED")
     rate_limit: str = Field(default="10/minute", alias="RATE_LIMIT")
 
     # LLM

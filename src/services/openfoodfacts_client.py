@@ -14,7 +14,7 @@ OFF_BASE_URL = "https://search.openfoodfacts.org"
 
 # OFF requires an identifying User-Agent or we get throttled/blocked.
 OFF_USER_AGENT = (
-    "Guzzlers-n-Dragons/0.1 (https://github.com/luponsio/Guzzlers-n-Dragons)"
+    "Guzzlers-n-Dragons/0.1 (https://github.com/jcanosan/Guzzlers-n-Dragons)"
 )
 
 
