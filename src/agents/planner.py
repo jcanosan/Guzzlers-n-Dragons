@@ -1,5 +1,6 @@
 """Planner agent: extracts constraints, identifies techniques, plans needs."""
 
+import asyncio
 import json
 
 import structlog
@@ -37,20 +38,28 @@ PLANNER_SYSTEM_PROMPT = (
 )
 
 
-def _gather_context(state: AgentState) -> dict:
-    """Query DB and RAG for ingredient profile, pattern, and technique docs."""
+async def _gather_context(state: AgentState) -> dict:
+    """Query DB and RAG for ingredient profile, pattern, and technique docs.
+
+    DB and vector-store calls are blocking; run them in a thread so the
+    event loop (and any in-flight SSE stream) is not stalled.
+    """
     request = state.request
     ingredient_name = request.fictional_ingredient
 
-    ingredient_profile = get_ingredient_by_name(ingredient_name)
-    pattern = get_pattern_by_meal_type(request.meal_type)
+    ingredient_profile = await asyncio.to_thread(
+        get_ingredient_by_name, ingredient_name
+    )
+    pattern = await asyncio.to_thread(
+        get_pattern_by_meal_type, request.meal_type
+    )
 
     rag_context = []
     for query in [
         f"basic techniques for {request.meal_type}",
         f"cooking methods for {request.meal_type} recipe",
     ]:
-        results = find_technique_substitution(query)
+        results = await asyncio.to_thread(find_technique_substitution, query)
         if results:
             rag_context.append(results[0]["content"])
 
@@ -140,7 +149,7 @@ async def run_planner(state: AgentState) -> dict:
     halts after MAX_ITERATIONS (defined in graph.py).
     """
     iteration = state.iteration + 1
-    ctx = _gather_context(state)
+    ctx = await _gather_context(state)
     user_prompt = _build_prompt(state, ctx)
     response = await call_llm(PLANNER_SYSTEM_PROMPT, user_prompt)
     planner_result = _parse_response(str(response.content))

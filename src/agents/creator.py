@@ -1,5 +1,6 @@
 """Creator agent: generates novel recipes with LLM + structured knowledge."""
 
+import asyncio
 import json
 
 import structlog
@@ -44,10 +45,14 @@ CREATOR_SYSTEM_PROMPT = (
 async def _gather_rag_context(
     planner, ingredient, ingredient_name: str
 ) -> dict:
-    """Query RAG tools for technique, flavor, and texture context."""
+    """Query RAG tools (Chroma + embedding) in a thread so the event loop is not
+    stalled.
+
+    These contain contextual info on technique, flavor and texture.
+    """
     technique_docs = []
     for query in planner.knowledge_queries[:3]:
-        results = find_technique_substitution(query)
+        results = await asyncio.to_thread(find_technique_substitution, query)
         if results:
             technique_docs.append(results[0]["content"])
 
@@ -58,13 +63,15 @@ async def _gather_rag_context(
     )
 
     flavor_docs = []
-    flavor_results = find_flavor_pairing(approx)
+    flavor_results = await asyncio.to_thread(find_flavor_pairing, approx)
     if flavor_results:
         flavor_docs.append(flavor_results[0]["content"])
 
     texture_docs = []
     texture_start = ingredient.texture if ingredient else "unknown"
-    texture_results = find_texture_modification("desired", texture_start)
+    texture_results = await asyncio.to_thread(
+        find_texture_modification, "desired", texture_start
+    )
     if texture_results:
         texture_docs.append(texture_results[0]["content"])
 

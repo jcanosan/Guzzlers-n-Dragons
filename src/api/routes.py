@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import structlog
 from fastapi import APIRouter, HTTPException, Request, status
@@ -8,6 +7,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from src.agents.graph import agent_graph
+from src.api.streaming import AgentEventStream
 from src.config.settings import settings
 from src.schemas.agents import AgentState
 from src.schemas.domain import FictionalIngredient
@@ -20,6 +20,7 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 AGENT_TIMEOUT_SECONDS = settings.agent_timeout_seconds
+SSE_PING_INTERVAL_SECONDS = 15.0
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -29,31 +30,6 @@ def _limit():
     if settings.rate_limit_enabled:
         return limiter.limit(settings.rate_limit)
     return lambda fn: fn
-
-
-def _sse_event(name: str, payload: dict) -> str:
-    """Format a Server-Sent Events message."""
-    return f"event: {name}\ndata: {json.dumps(payload, default=str)}\n\n"
-
-
-def _dump(value: object) -> dict:
-    """Serialize a pydantic model to a dict, or return {}."""
-    dump = getattr(value, "model_dump", None)
-    return dump() if callable(dump) else {}
-
-
-def _node_update(node: str, update: dict) -> dict | None:
-    """Curate a node's state update into a serializable payload."""
-    if node == "planner":
-        return {
-            "iteration": update.get("iteration", 0),
-            "planner_result": _dump(update.get("planner_result")),
-        }
-    if node == "creator":
-        return {"draft_recipe": _dump(update.get("draft_recipe"))}
-    if node == "critic":
-        return {"report": update.get("report") or {}}
-    return None
 
 
 def _get(draft, key: str, default=None):
@@ -133,48 +109,21 @@ async def transform_ingredient(
 async def transform_stream(request: Request, body: AlchemyRequest):
     """Stream the Planner -> Creator -> Critic pipeline as SSE.
 
-    Emits a `node` event per completed stage with its state update, an
-    `error` event on failure, and a `done` event on success. The graph is
-    sequential, so the frontend infers running-stage from completion order.
+    Emits a `node` event per completed stage, an `error` event on
+    failure, and a `done` event on success.
     """
-
-    async def event_source():
-        initial_state = AgentState(request=body)
-        try:
-            async with asyncio.timeout(AGENT_TIMEOUT_SECONDS):
-                async for chunk in agent_graph.astream(
-                    initial_state, stream_mode="updates"
-                ):
-                    if not isinstance(chunk, dict):
-                        continue
-                    for node, update in chunk.items():
-                        payload = _node_update(node, update)
-                        if payload:
-                            yield _sse_event(
-                                "node",
-                                {
-                                    "node": node,
-                                    "stage": "end",
-                                    "data": payload,
-                                },
-                            )
-            yield _sse_event("done", {})
-        except TimeoutError:
-            logger.warning("agent_stream_timeout")
-            yield _sse_event("error", {"message": "Agent pipeline timed out"})
-        except Exception as exc:
-            logger.exception("agent_stream_failed")
-            yield _sse_event(
-                "error", {"message": f"{type(exc).__name__}: {exc}"}
-            )
-
-    return StreamingResponse(event_source(), media_type="text/event-stream")
+    relay = AgentEventStream(
+        body,
+        timeout_seconds=AGENT_TIMEOUT_SECONDS,
+        ping_interval_seconds=SSE_PING_INTERVAL_SECONDS,
+    )
+    return StreamingResponse(relay.events(), media_type="text/event-stream")
 
 
 @router.get("/ingredients", response_model=list[FictionalIngredient])
 async def get_ingredients(thematic_group: str | None = None):
     """List available fictional ingredients, optionally filtered by theme."""
-    ingredients = list_ingredients(thematic_group)
+    ingredients = await asyncio.to_thread(list_ingredients, thematic_group)
     return ingredients
 
 
@@ -183,7 +132,9 @@ async def get_ingredients(thematic_group: str | None = None):
 )
 async def get_ingredient(ingredient_name: str):
     """Get details for a specific fictional ingredient."""
-    ingredient = get_ingredient_by_name(ingredient_name)
+    ingredient = await asyncio.to_thread(
+        get_ingredient_by_name, ingredient_name
+    )
     if not ingredient:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
