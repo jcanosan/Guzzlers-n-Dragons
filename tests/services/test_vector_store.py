@@ -83,6 +83,21 @@ class TestHybridSearch:
         assert results, "keyword failure must degrade, not return []"
         assert any("sauce" in r["content"] for r in results)
 
+    def test_vector_failure_degrades_to_keyword_only(
+        self, test_store, monkeypatch
+    ):
+        vector_store.add_documents(
+            [{"content": "How to thicken a sauce", "metadata": {}}]
+        )
+
+        def boom(query, k, filter):
+            raise RuntimeError("chroma vector search down")
+
+        monkeypatch.setattr(vector_store, "_vector_search", boom)
+        results = vector_store.hybrid_search("thickening sauce", num_results=2)
+        assert results, "vector failure must degrade, not raise"
+        assert any("sauce" in r["content"] for r in results)
+
     def test_keyword_branch_finds_token_match(self, test_store):
         vector_store.add_documents(
             [

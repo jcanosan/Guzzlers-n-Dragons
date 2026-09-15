@@ -93,23 +93,30 @@ class VectorStore:
                   (0.0 = keyword only, 1.0 = vector only)
         """
         self._ensure_initialized()
+
+        vector_results: list[tuple] = []
+        keyword_results: list[tuple] = []
         try:
             vector_results = self._vector_search(query, num_results * 2, filter)
+        except Exception as exc:
+            logger.warning(
+                "vector_search_failed",
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
+        try:
             keyword_results = self._keyword_search(
                 query, num_results * 2, filter
             )
         except Exception as exc:
             logger.warning(
-                "vector_search_degraded",
+                "keyword_search_failed",
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
-            keyword_results = []
-            vector_results = (
-                self._vector_search(query, num_results * 2, filter) or []
-            )
-        merged = self._deduplicate(vector_results, keyword_results)
-        return self._rank_results(merged, alpha, num_results)
+
+        merged_results = self._deduplicate(vector_results, keyword_results)
+        return self._rank_results(merged_results, alpha, num_results)
 
     def _vector_search(
         self, query: str, k: int, filter: dict | None
