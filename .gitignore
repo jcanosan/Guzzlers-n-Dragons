@@ -229,3 +229,6 @@ __marimo__/
 data/ingredients.db
 data/chroma/
 .tokensave
+
+# promptfoo eval run output
+evals/.last-run.json

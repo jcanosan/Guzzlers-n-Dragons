@@ -1,0 +1,47 @@
+# Smoke golden cases: provider output is a JSON string with keys
+#   recipe / report / iterations
+# `python: file://qa_structure.py` — generic structure check (runs on every case).
+# `python: file://banned.py` — recipe-only banned-ingredient check via `banned` var.
+# Judge (llm-rubric) arrives in Phase 2 — deterministic assertions only here.
+- description: "Fantasy anachronism: potato banned from recipe"
+  vars:
+    ingredient: "kingroot of the verdant choir"
+    theme: fantasy
+    meal_type: main course
+    banned: potato
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+
+- description: "Sci-fi pass: spice melange creates a cookable dish"
+  vars:
+    ingredient: "spice melange"
+    theme: sci_fi
+    meal_type: main course
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+- description: "Mythological: ambrosia yields a dish with a critic verdict"
+  vars:
+    ingredient: "ambrosia"
+    theme: mythological
+    meal_type: dessert
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+- description: "Constraint: vegetarian filter honored in recipe"
+  vars:
+    ingredient: "emberfruit of the phosphor grove"
+    theme: fantasy
+    meal_type: main course
+    dietary: vegetarian
+    banned: beef, pork, chicken
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py

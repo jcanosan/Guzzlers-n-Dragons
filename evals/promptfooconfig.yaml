@@ -1,0 +1,15 @@
+# smoke: 4 cases, one per theme + a dietary constraint.
+# Judge (llm-rubric) arrives in Phase 2 — deterministic assertions only here.
+description: "Guzzlers-n-Dragons agent evals (smoke)"
+
+# Run from repo root:  PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml
+providers:
+  - id: python:provider.py
+    label: "alchemy-agent-pipeline"
+    config:
+      pythonExecutable: .venv/bin/python
+
+prompts:
+  - "Transform the fictional ingredient into a cookable recipe."
+
+tests: file://cases.yaml
