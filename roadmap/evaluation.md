@@ -22,9 +22,13 @@ Critic pipeline actually catches what it claims to. Manual run only — no CI ga
 - **Promptfoo** via `npx` (no repo dependencies; Node present in dev env). Free, local,
   official LangGraph integration, first-class Ollama support (provider, judge, embeddings).
   Python provider pattern keeps eval logic in Python.
-- **Judge model**: `ollama:chat:gemma4:31b-cloud` at temperature 0.1 for `llm-rubric`
-  assertions. Same family as the generator → accept circularity or use a stronger judge
-  later; document the choice.
+- **Judge model**: `nemotron-3-super:cloud` (NVIDIA, 120B MoE) for `llm-rubric`
+  assertions — different model family than the generator (`gemma4:31b-cloud`, Google),
+  which breaks generator/judge self-preference bias. Cheap on Ollama Cloud credits.
+  Pin the judge + date in eval docs: `:cloud` routes to a rolling backend that may
+  silently update the snapshot. It is a thinking model: if rubric verdicts come back
+  unparsable, the rubric prompt must demand a final `PASS/FAIL` line.
+  Fallback judge: `gemma4:31b-cloud` at temp 0.1 if nemotron verdicts prove unreliable.
 
 ## Phases
 
@@ -65,8 +69,10 @@ Acceptance: a stranger can clone, run the evals, and read the pass rates.
 - Trajectory evals (`trajectory:*`) if tool-choice ever becomes the risk.
 
 ## Pitfalls to avoid
-- **Circular judge**: judge model ≈ generator model. Mitigate: temp 0.1, one dimension per
-  rubric, "Unknown" fallback; be honest in README.
+- **Judge circularity**: mitigated by cross-family judge (NVIDIA judging Google's
+  output). Residual: keep one dimension per rubric + "Unknown" fallback; be honest in README.
+- **Judge drift**: `:cloud` models route to rolling snapshots without version notice.
+  Mitigate: record judge model + date with every eval run; re-baseline after upgrades.
 - **One-run noise**: a single trial is noise. Use `repeat`/multiple trials, report pass@k
   vs pass^k.
 - **Live-API flakiness**: correlated failures look like agent bugs. If it becomes noise,
