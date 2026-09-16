@@ -1,0 +1,50 @@
+# Eval gate: Promptfoo golden dataset over the true agent pipeline.
+# Runs on PRs or direct pushes touching the pipeline or eval suite.
+# Needs OLLAMA_API_KEY (+ optional USDA_API_KEY) repo secret — Ollama
+# Cloud serves the generator AND the judge from the same key.
+name: eval
+
+"on":
+  pull_request: { paths: ["evals/**", "src/**", "uv.lock"] }
+  push: { branches: [main], paths: ["evals/**", "src/**", "uv.lock"] }
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+  USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # action needs history for change detection
+
+      - name: Install Node 24 (promptfoo requires >= 22.22)
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Sync Python deps + seed data
+        run: |
+          uv sync --no-progress
+          PYTHONPATH=. uv run python scripts/run_seeds.py
+
+      - name: Run eval suite
+        uses: promptfoo/promptfoo-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config: evals/promptfooconfig.yaml
+          use-config-prompts: 'true'
+        env:
+          PYTHONPATH: .
