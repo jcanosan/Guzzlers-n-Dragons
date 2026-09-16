@@ -316,7 +316,7 @@ The project includes a `docker/Dockerfile`; `railway.json` points Railway at it.
 | Variable | Example | Notes |
 |---|---|---|
 | `LLM_MODEL` | `gemma4:31b-cloud` | Must resolve to a reachable Ollama instance |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama base URL (default); `https://api.ollama.com` for Ollama Cloud |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama base URL (default); `https://api.ollama.com` for Ollama Cloud |
 | `OLLAMA_API_KEY` | `your_api_key` | Required for Ollama Cloud; leave empty for a local Ollama |
 | `CORS_ORIGINS` | `["https://app.example.com"]` | Your frontend's deployed origin |
 | `DEBUG` | `false` | Disables `/docs` and `/redoc` when false |

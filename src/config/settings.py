@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     llm_model: str = Field(default="gemma4:31b-cloud", alias="LLM_MODEL")
     llm_temperature: float = Field(default=0.7, alias="LLM_TEMPERATURE")
     ollama_host: str = Field(
-        default="http://localhost:11434", alias="OLLAMA_HOST"
+        default="http://localhost:11434", alias="OLLAMA_BASE_URL"
     )
     ollama_api_key: str = Field(default="", alias="OLLAMA_API_KEY")
 

@@ -18,10 +18,9 @@ permissions:
   pull-requests: write
 
 env:
-  # Python pipeline reads OLLAMA_HOST; promptfoo's ollama judge provider
-  # reads OLLAMA_BASE_URL. Same endpoint, two consumers (no local ollama
-  # on the runner — everything rides Ollama Cloud).
-  OLLAMA_HOST: https://api.ollama.com
+  # Single Ollama endpoint env for both consumers (no local ollama on the
+  # runner — everything rides Ollama Cloud): the Python pipeline reads it
+  # via Settings, promptfoo's ollama judge provider reads OLLAMA_BASE_URL.
   OLLAMA_BASE_URL: https://api.ollama.com
   OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
   USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
