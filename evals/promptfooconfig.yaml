@@ -31,3 +31,5 @@ defaultTest:
       id: ollama:chat:nemotron-3-super:cloud
       config:
         temperature: 0.1
+        headers:
+          Authorization: "Bearer {{ env.OLLAMA_API_KEY }}"
