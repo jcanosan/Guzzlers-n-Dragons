@@ -1,15 +1,33 @@
-# smoke: 4 cases, one per theme + a dietary constraint.
-# Judge (llm-rubric) arrives in Phase 2 — deterministic assertions only here.
-description: "Guzzlers-n-Dragons agent evals (smoke)"
-
+# Stage-2 golden dataset over the real Planner -> Creator -> Critic graph.
 # Run from repo root:  PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml
+# Judge (llm-rubric): cross-family nemotron-3-super:cloud, temp 0.1 — breaks
+# generator/judge circularity. Pin judge + run date in any published results
+# (:cloud snapshots roll silently).
+description: "Guzzlers-n-Dragons agent evals (golden dataset)"
+tests: file://cases.yaml
+
+prompts:
+  - "Transform the fictional ingredient into a cookable recipe."
+
 providers:
   - id: python:provider.py
     label: "alchemy-agent-pipeline"
     config:
       pythonExecutable: .venv/bin/python
 
-prompts:
-  - "Transform the fictional ingredient into a cookable recipe."
-
-tests: file://cases.yaml
+defaultTest:
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: llm-rubric
+      value: >-
+        The output is JSON with keys recipe, report, iterations, constraints.
+        Just one question: is the `recipe` COOKABLE — real human-scale
+        preparation steps with plausible ingredient amounts (no gibberish,
+        no impossible units) — and plausible for its own theme? Reply PASS
+        or FAIL.
+  options:
+    provider:
+      id: ollama:chat:nemotron-3-super:cloud
+      config:
+        temperature: 0.1

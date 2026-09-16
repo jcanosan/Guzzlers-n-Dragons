@@ -1,11 +1,21 @@
-# Smoke golden cases: provider output is a JSON string with keys
-#   recipe / report / iterations
-# `python: file://qa_structure.py` — generic structure check (runs on every case).
-# `python: file://banned.py` — recipe-only banned-ingredient check via `banned` var.
-# Judge (llm-rubric) arrives in Phase 2 — deterministic assertions only here.
-- description: "Fantasy anachronism: potato banned from recipe"
+# Golden dataset (Phase 2). Provider output is a JSON string:
+#   recipe / report / iterations / constraints
+# Shared assertions:
+#   qa_structure.py   - generic structure (runs on every case via defaultTest)
+#   qa_constraints.py - servings exact-match + prep/cook within limits
+#   banned.py         - recipe-only banned-ingredient check (`banned` var;
+#                       critic report excluded — it may legitimately name offenders)
+# Judge (`llm-rubric`, one dimension: cookable + theme-plausible) runs via
+# nemotron-3-super:cloud, see promptfooconfig.yaml defaultTest.
+
+# --- Anachronism traps: ingredients pushing banned-world foods -----------
+# NOTE: "fantasy feast resisting maize" is a live red case — the run showed
+# the Creator slipping "approximate with sweet corn" into a fantasy dish
+# (Critic didn't catch the substitute). See roadmap/evaluation.md pitfalls.
+
+- description: "Anachronism: fantasy grain requesting potato"
   vars:
-    ingredient: "kingroot of the verdant choir"
+    ingredient: "earthmarrow tuber of the root choir"
     theme: fantasy
     meal_type: main course
     banned: potato
@@ -15,7 +25,56 @@
     - type: python
       value: file://banned.py
 
-- description: "Sci-fi pass: spice melange creates a cookable dish"
+- description: "Anachronism: fantasy feast resisting maize"
+  vars:
+    ingredient: "goldkernel of the harvest god"
+    theme: fantasy
+    meal_type: main course
+    banned: corn, maize, popcorn
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+
+- description: "Anachronism: fantasy root recipe holds the tomato line"
+  vars:
+    ingredient: "sunbelter of the crimson orchard"
+    theme: fantasy
+    meal_type: side dish
+    banned: tomato, pomodoro, marinara
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+
+- description: "Anachronism: mythological offering declines canned goods"
+  vars:
+    ingredient: "ichor of the fallen star"
+    theme: mythological
+    meal_type: beverage
+    banned: canned, instant, preservatives
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+
+- description: "Anachronism: mythological stew repels microwave queries"
+  vars:
+    ingredient: "lotus of perpetual dreams"
+    theme: mythological
+    meal_type: soup
+    banned: microwave, pressure cooker, airfryer, air fryer
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+
+# --- Seeded ingredients per theme ---------------------------------------
+- description: "Sci-fi seeded: spice melange main course"
   vars:
     ingredient: "spice melange"
     theme: sci_fi
@@ -24,7 +83,25 @@
     - type: python
       value: file://qa_structure.py
 
-- description: "Mythological: ambrosia yields a dish with a critic verdict"
+- description: "Sci-fi seeded: nutrient paste breakfast"
+  vars:
+    ingredient: "lysosome ration bar"
+    theme: sci_fi
+    meal_type: breakfast
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+- description: "Fantasy seeded: emberfruit main course"
+  vars:
+    ingredient: "emberfruit of the phosphor grove"
+    theme: fantasy
+    meal_type: main course
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+- description: "Mythological seeded: ambrosia dessert"
   vars:
     ingredient: "ambrosia"
     theme: mythological
@@ -33,15 +110,110 @@
     - type: python
       value: file://qa_structure.py
 
-- description: "Constraint: vegetarian filter honored in recipe"
+- description: "Mythological seeded: dragon-milk porridge"
+  vars:
+    ingredient: "dragon milk of the synergy herd"
+    theme: mythological
+    meal_type: porridge
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+# --- Constraint adherence ------------------------------------------------
+- description: "Constraint: vegetarian emberfruit banquet"
   vars:
     ingredient: "emberfruit of the phosphor grove"
     theme: fantasy
     meal_type: main course
     dietary: vegetarian
-    banned: beef, pork, chicken
+    banned: beef, pork, chicken, lamb
   assert:
     - type: python
       value: file://qa_structure.py
     - type: python
       value: file://banned.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Constraint: sci-fi feast for eight"
+  vars:
+    ingredient: "spice melange"
+    theme: sci_fi
+    meal_type: main course
+    servings: 8
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Constraint: fifteen-minute mythological dessert"
+  vars:
+    ingredient: "ambrosia"
+    theme: mythological
+    meal_type: dessert
+    max_prep: 15
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Constraint: hard-difficulty fantasy main"
+  vars:
+    ingredient: "kingroot of the verdant choir"
+    theme: fantasy
+    meal_type: main course
+    difficulty: hard
+  assert:
+    - type: python
+      value: file://qa_structure.py
+
+# --- Regression known-goods: the pipeline must just work -----------------
+- description: "Regression: spice melange keeps producing a dish"
+  vars:
+    ingredient: "spice melange"
+    theme: sci_fi
+    meal_type: soup
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Regression: kingroot fantasy main"
+  vars:
+    ingredient: "kingroot of the verdant choir"
+    theme: fantasy
+    meal_type: main course
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Regression: lotus dream beverage"
+  vars:
+    ingredient: "lotus of perpetual dreams"
+    theme: mythological
+    meal_type: beverage
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://qa_constraints.py
+
+- description: "Regression: dragon-milk vegetarian porridge"
+  vars:
+    ingredient: "dragon milk of the synergy herd"
+    theme: mythological
+    meal_type: porridge
+    dietary: vegetarian
+    banned: beef, pork, chicken, lamb
+  assert:
+    - type: python
+      value: file://qa_structure.py
+    - type: python
+      value: file://banned.py
+    - type: python
+      value: file://qa_constraints.py

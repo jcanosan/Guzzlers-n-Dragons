@@ -18,6 +18,9 @@ ROOT = str(Path(__file__).resolve().parents[1])
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+from src.agents.graph import agent_graph  # noqa: E402
+from src.schemas.agents import AgentState  # noqa: E402
+from src.schemas.request import AlchemyRequest, Constraints  # noqa: E402
 from src.services.database import init_db  # noqa: E402
 from src.services.vector_store import vector_store  # noqa: E402
 
@@ -42,19 +45,18 @@ def _init() -> None:
 
 
 async def run_pipeline(variables: dict[str, Any]) -> str:
-    from src.agents.graph import agent_graph
-    from src.schemas.agents import AgentState
-    from src.schemas.request import AlchemyRequest, Constraints
-
+    constraints = Constraints(
+        servings=int(variables.get("servings", 4)),
+        dietary=_split_list(variables.get("dietary")),
+        difficulty=variables.get("difficulty") or None,
+        max_prep_time_minutes=int(variables.get("max_prep", 60)),
+        max_cook_time_minutes=int(variables.get("max_cook", 120)),
+    )
     request = AlchemyRequest(
         fictional_ingredient=str(variables["ingredient"]),
         meal_type=str(variables.get("meal_type", "main course")),
         thematic_group=str(variables["theme"]),
-        constraints=Constraints(
-            servings=int(variables.get("servings", 4)),
-            dietary=_split_list(variables.get("dietary")),
-            difficulty=variables.get("difficulty") or None,
-        ),
+        constraints=constraints,
     )
     state: dict[str, Any] = {}
     async for chunk in agent_graph.astream(
@@ -68,6 +70,7 @@ async def run_pipeline(variables: dict[str, Any]) -> str:
         "recipe": recipe.model_dump() if recipe else None,
         "report": report,
         "iterations": state.get("iteration", 0),
+        "constraints": constraints.model_dump(),
     }
     return json.dumps(result, default=str)
 
