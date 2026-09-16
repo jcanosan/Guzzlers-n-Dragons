@@ -9,9 +9,6 @@
 # nemotron-3-super:cloud, see promptfooconfig.yaml defaultTest.
 
 # --- Anachronism traps: ingredients pushing banned-world foods -----------
-# NOTE: "fantasy feast resisting maize" is a live red case — the run showed
-# the Creator slipping "approximate with sweet corn" into a fantasy dish
-# (Critic didn't catch the substitute). See roadmap/evaluation.md pitfalls.
 
 - description: "Anachronism: fantasy grain requesting potato"
   vars:

@@ -1,12 +1,12 @@
 # Sample eval run
 
-Run id: `eval-CAR-2026-09-16T08:59:08` — pinned 2026-09-16 (UTC+2 session). Regenerate: `PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml`.
+Run id: `eval-upE-2026-09-16T10:02:51` — pinned 2026-09-16 (UTC+2 session). Regenerate: `PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml`.
 
 Judge: `nemotron-3-super:cloud` @ 0.1 (see promptfooconfig.yaml defaultTest). `:cloud` snapshots roll silently — read results together with this date.
 
 | Case | Verdict | Failing assertion |
 | ---- | ------- | ----------------- |
-| Anachronism: fantasy feast resisting maize | **FAIL** | `file://banned.py` |
+| Anachronism: fantasy feast resisting maize | PASS | — |
 | Anachronism: fantasy grain requesting potato | PASS | — |
 | Anachronism: fantasy root recipe holds the tomato line | PASS | — |
 | Anachronism: mythological offering declines canned goods | PASS | — |
@@ -25,6 +25,4 @@ Judge: `nemotron-3-super:cloud` @ 0.1 (see promptfooconfig.yaml defaultTest). `:
 | Sci-fi seeded: nutrient paste breakfast | PASS | — |
 | Sci-fi seeded: spice melange main course | PASS | — |
 
-**Total: 17 passed / 1 failed / 0 errors — 364s, judge tokens 26,628**
-
-The single failure is the live anachronism red: the Creator wrote "approximate with high-quality sweet corn" into a fantasy dish and the Critic didn't flag the substitute. Documented in evals/cases.yaml.
+**Total: 18 passed / 0 failed / 0 errors — 260s, judge tokens 26,387**

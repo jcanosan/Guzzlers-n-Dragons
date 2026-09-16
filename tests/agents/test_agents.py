@@ -159,6 +159,32 @@ class TestCritic:
             assert report["thematic_consistency"] == "FAIL"
             assert report["validation_issues"][0]["type"] == "anachronism"
 
+    async def test_critic_fails_hidden_substitute(
+        self, basic_request, draft_recipe
+    ):
+        """Anachronism smuggled into ingredient notes/instructions."""
+        smuggled = draft_recipe.model_copy(
+            update={
+                "ingredients": [
+                    {"item": "fine grain mix", "amount": "1 cup", "notes": ""}
+                ],
+                "instructions": [
+                    "Combine",
+                    "Approximate texture with corn if needed",
+                ],
+            }
+        )
+        state = AgentState(request=basic_request, draft_recipe=smuggled)
+
+        with patch(
+            "src.agents.critic.lookup_nutrition",
+            AsyncMock(return_value={"source": "unavailable"}),
+        ):
+            result = await run_critic(state)
+            report = result["report"]
+            assert report["thematic_consistency"] == "FAIL"
+            assert report["validation_issues"][0]["type"] == "anachronism"
+
     async def test_critic_warns_time_exceeded(
         self, basic_request, draft_recipe
     ):

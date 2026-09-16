@@ -21,6 +21,9 @@ THEMATIC_CONSTRAINTS = {
             "tomato",
             "potato",
             "corn",
+            "maize",
+            "pomodoro",
+            "marinara",
             "chocolate",
             "chili pepper",
             "chili",
@@ -43,13 +46,25 @@ THEMATIC_CONSTRAINTS = {
 }
 
 
+def _draft_texts(draft) -> list[str]:
+    """All free-text surfaces anachronisms can hide in: names + notes +
+    instructions."""
+    texts: list[str] = [str(i.get("item", "")) for i in draft.ingredients]
+    texts += [str(i.get("notes", "")) for i in draft.ingredients]
+    texts += list(draft.instructions)
+    return [t for t in texts if t]
+
+
 def _check_thematic(
-    thematic_group: str, draft_ingredients: list[dict]
+    thematic_group: str, texts: list[str]
 ) -> tuple[list[ValidationIssue], str]:
-    """Validate that no anachronistic ingredients appear in the recipe.
+    """Validate that no anachronistic terms appear in the recipe text.
+
+    Scans ingredient names, substitute notes, and instructions —
+    e.g. 'approximate with corn' hides the anachronism in a note.
 
     Returns (issues, thematic_status) where thematic_status is
-    "PASS" if no issues, "FAIL" if forbidden ingredients found.
+    "PASS" if no issues, "FAIL" if forbidden terms found.
     """
     issues: list[ValidationIssue] = []
     constraints = THEMATIC_CONSTRAINTS.get(thematic_group)
@@ -58,9 +73,8 @@ def _check_thematic(
 
     for word in constraints["forbidden"]:
         pattern = re.compile(rf"\b{re.escape(word)}\b")
-        for ingredient_item in draft_ingredients:
-            item_name = ingredient_item.get("item", "").lower()
-            if pattern.search(item_name):
+        for text in texts:
+            if pattern.search(text.lower()):
                 issues.append(
                     ValidationIssue(
                         type="anachronism",
@@ -192,7 +206,7 @@ async def run_critic(state: AgentState) -> dict:
         return _fail("No draft recipe to validate")
 
     thematic_issues, thematic = _check_thematic(
-        state.request.thematic_group, draft.ingredients
+        state.request.thematic_group, _draft_texts(draft)
     )
     cook_issues = _check_cookability(
         draft,
