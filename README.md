@@ -116,6 +116,28 @@ PYTHONPATH=. uv run python scripts/demo.py --ingredient "spice melange" --theme 
 [Sample output](examples/demo-output.txt):
 ![Example demo run](examples/demo.gif)
 
+### Evaluating the pipeline
+
+The agent loop ships with a [Promptfoo](https://promptfoo.dev) eval harness in
+`evals/` that runs the real Planner → Creator → Critic graph against an 18-case golden dataset.
+
+That means, it evaluates anachronism traps per theme, seeded lore ingredients, constraint adherence (dietary, servings, time budgets...), and regression
+known-goods.
+
+Judge asserts if the recipe is cookable and theme-plausible. This uses 
+`nemotron-3-super:cloud`, a different model family from the generator,
+which avoids judge/generator self-preference. See
+[roadmap/evaluation.md](roadmap/evaluation.md) for the design and
+[evals/RESULTS.md](evals/RESULTS.md) for a pinned sample run.
+
+```bash
+# From the repo root (needs Node >= 22.22: npx, no install)
+# and `uv sync` + seeded data as in Quick Start.
+PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml
+
+npx promptfoo view   # interactive results browser
+```
+
 ## API Endpoints
 
 | Method | Endpoint                      | Description                                |

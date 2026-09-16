@@ -9,7 +9,7 @@ Critic pipeline actually catches what it claims to. Manual run only — no CI ga
 - The eval provider wraps the **same** `agent_graph.astream` call used by `scripts/demo.py`,
   so evals exercise the real compiled graph, not a mock.
 - Highest-value cases test **absence**, not just presence: an anachronism the Critic must
-  reject (e.g. potatoes in a fantasy feast) asserts the ingredient is *not* in the final
+  reject (e.g. potatoes in a fantasy feast) asserts the ingredient is _not_ in the final
   recipe and the report flags it.
 - The interesting trajectory signal (did the Critic reject correctly, how many iterations)
   is captured cheaply with deterministic assertions on the final state — no tool-path tracing
@@ -33,6 +33,7 @@ Critic pipeline actually catches what it claims to. Manual run only — no CI ga
 ## Phases
 
 ### Phase 1 — Scaffold
+
 - `evals/provider.py`: Python provider with `call_api(prompt, options, context)`; rebuilds
   `AlchemyRequest` from vars, `init_db()` + `vector_store.init()`, streams the graph, returns
   recipe + report + iteration count.
@@ -44,6 +45,7 @@ Acceptance: `PYTHONPATH=. npx promptfoo eval -c evals/promptfooconfig.yaml` runs
 end-to-end against the real pipeline.
 
 ### Phase 2 — Golden dataset
+
 - 15 cases: anachronism traps per theme, seeded ingredients (fantasy/sci_fi/mythological),
   constraint adherence (vegetarian, prep-time, servings), 3–5 regression known-good recipes.
 - Assertions:
@@ -57,6 +59,7 @@ Acceptance: full suite runs; per-case pass/fail maps to the failure mode each ca
 built to catch.
 
 ### Phase 3 — Docs & sample output
+
 - README "Evaluating the pipeline" section: what's tested, run commands
   (`npx promptfoo eval`, `npx promptfoo view`), caveats.
 - Commit a sample run output (JSON/markdown) so the harness is visible without running it.
@@ -64,20 +67,21 @@ built to catch.
 Acceptance: a stranger can clone, run the evals, and read the pass rates.
 
 ### Phase 4 — Deferred
+
 - CI gate via `promptfoo/promptfoo-action@v1` once evals are stable **and** an Ollama Cloud
   endpoint is reachable from GitHub Actions (a 31b model won't run on a runner).
 - Trajectory evals (`trajectory:*`) if tool-choice ever becomes the risk.
 
 ## Pitfalls to avoid
+
 - **Judge circularity**: mitigated by cross-family judge (NVIDIA judging Google's
-  output). Residual: keep one dimension per rubric + "Unknown" fallback; be honest in README.
-- **Judge drift**: `:cloud` models route to rolling snapshots without version notice.
-  Mitigate: record judge model + date with every eval run; re-baseline after upgrades.
-- **One-run noise**: a single trial is noise. Use `repeat`/multiple trials, report pass@k
-  vs pass^k.
-- **Live-API flakiness**: correlated failures look like agent bugs. If it becomes noise,
-  mock the HTTP clients in eval mode (deterministic mode).
-- **Eval saturation**: at 100% the suite stops giving signal — add harder cases. Treat the
-  dataset as a living artifact.
-- **Overclaiming**: in README, cite OpenAI's migration cookbook, not "Anthropic endorses
-  Promptfoo".
+  output).
+- **Judge drift**: `:cloud` models route to rolling snapshots without version
+  notice.
+  Mitigation: record judge model + date with every eval run; re-baseline after upgrades.
+- **One-run noise**: a single trial is noise. Use `repeat`/multiple trials,
+  report pass@k vs pass^k.
+- **Live-API flakiness**: correlated failures look like agent bugs.
+  If it becomes noise, mock the HTTP clients in eval mode (deterministic mode).
+- **Eval saturation**: at 100% the suite stops giving signal — add harder cases.
+  Treat the dataset as a living artifact.
