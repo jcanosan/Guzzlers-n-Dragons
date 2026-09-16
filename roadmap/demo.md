@@ -8,7 +8,7 @@ Goal: showcase the Planner → Creator → Critic agent loop as an agent-enginee
 
 ## Model backend
 
-`gemma4:31b-cloud` runs cloud-side (no local Ollama dependency). Live demo needs `OLLAMA_HOST`/`OLLAMA_API_KEY` + USDA/TheMealDB keys in the deploy env. External API keys may be absent in prod → pipeline must degrade gracefully (verify).
+`gemma4:31b-cloud` runs cloud-side (no local Ollama dependency). Live demo needs `OLLAMA_BASE_URL`/`OLLAMA_API_KEY` + USDA/TheMealDB keys in the deploy env. External API keys may be absent in prod → pipeline must degrade gracefully (verify).
 
 ## Phases
 

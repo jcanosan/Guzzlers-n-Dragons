@@ -35,3 +35,4 @@
 - **Logging**: `structlog` for JSON logging.
 - **Env**: Secrets/configs in `.env` via `src.config.settings`.
 - **Data**: DB at `data/ingredients.db`, Vector store at `data/chroma`.
+- **Commits**: All commits go through `committer` subagent. Commit only when asks. If subagent is blocked or fails, report it and wait, never substitute a manual commit without asking.

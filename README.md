@@ -8,6 +8,7 @@ AI recipe alchemist: turns fictional ingredients (Lembas, spice melange, ambrosi
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?logo=langchain&logoColor=white)](https://www.langchain.com/langgraph)
 [![CI](https://github.com/jcanosan/Guzzlers-n-Dragons/actions/workflows/ci.yml/badge.svg)](https://github.com/jcanosan/Guzzlers-n-Dragons/actions/workflows/ci.yml)
+[![Agent evals](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjcanosan%2FGuzzlers-n-Dragons%2Fmain%2F.github%2Fbadges%2Feval.json)](evals/RESULTS.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Highlights

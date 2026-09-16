@@ -232,3 +232,6 @@ data/chroma/
 
 # promptfoo eval run output
 evals/.last-run.json
+
+# promptfoo-action run output (dropped in repo root on CI)
+output-*.json

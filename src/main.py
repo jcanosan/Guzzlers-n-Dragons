@@ -62,7 +62,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI):
     logger.info(
         "starting_application",
-        ollama_host=os.environ.get("OLLAMA_HOST", "not set"),
+        ollama_host=os.environ.get("OLLAMA_BASE_URL", "not set"),
         ollama_key_set=bool(os.environ.get("OLLAMA_API_KEY")),
     )
     init_db()
