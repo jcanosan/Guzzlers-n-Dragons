@@ -231,7 +231,7 @@ data/chroma/
 .tokensave
 
 # promptfoo eval run output
-evals/.last-run.json
+evals/latest-run.json
 
 # promptfoo-action run output (dropped in repo root on CI)
 output-*.json

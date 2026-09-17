@@ -5,6 +5,9 @@
 # (:cloud snapshots roll silently).
 description: "Guzzlers-n-Dragons agent evals (golden dataset)"
 tests: file://cases.yaml
+# Deterministic results file: badge.py reads this exact path (the
+# promptfoo-action's own generated -o file proved unreliable to find).
+outputPath: evals/latest-run.json
 
 prompts:
   - "Transform the fictional ingredient into a cookable recipe."

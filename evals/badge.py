@@ -1,22 +1,26 @@
 """Render the eval pass-rate badge JSON for shields.io endpoint badges.
 
-Scans for promptfoo's `output-*.json` (the promptfoo-action writes one per
-run) and writes `.github/badges/eval.json`. Exits 1 when no output file
-exists so the badge step fails loudly but the eval itself still reports.
+Reads the deterministic results file `evals/latest-run.json` (written by
+promptfoo via `outputPath` in promptfooconfig.yaml) and writes
+`.github/badges/eval.json`. Falls back to promptfoo-action's
+`output-*.json` for older runs. Exits 1 when nothing is found so the
+badge step fails loudly while the eval step itself already reported.
 """
 
 import glob
 import json
 import os
 
-ROOT = __file__.rsplit("/", 2)[0] if "/" in __file__ else os.getcwd()
-
 
 def main() -> None:
-    files = glob.glob("output-*.json") or glob.glob("**/output-*.json")
+    files = (
+        ["evals/latest-run.json"]
+        if os.path.exists("evals/latest-run.json")
+        else glob.glob("output-*.json")
+    )
     if not files:
-        raise SystemExit("no eval output json found")
-    latest = max(files, key=os.path.getmtime)
+        raise SystemExit("no eval output found")
+    latest = files[0]
     stats = json.load(open(latest))["results"]["stats"]
     total = stats["successes"] + stats["failures"] + stats["errors"]
     pct = stats["successes"] / total if total else 0
