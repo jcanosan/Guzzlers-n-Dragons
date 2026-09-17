@@ -48,14 +48,13 @@ jobs:
           PYTHONPATH=. uv run python scripts/run_seeds.py
 
       - name: Run eval suite
-        id: eval
-        uses: promptfoo/promptfoo-action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          config: evals/promptfooconfig.yaml
-          use-config-prompts: 'true'
-        env:
-          PYTHONPATH: .
+        # Native npx (not promptfoo-action): the action always passes -o,
+        # which overrides the config's outputPath and then deletes the
+        # generated file — evals/latest-run.json would never exist for
+        # the badge step. Flags match the action's own defaults.
+        run: |
+          npx --yes promptfoo@latest eval -c evals/promptfooconfig.yaml \
+            --no-share --max-concurrency 4
 
       - name: Compute eval badge
         if: ${{ github.event_name != 'pull_request' && always() }}
@@ -67,7 +66,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git status --porcelain --quiet -- .github/badges; then
+          if [ -z "$(git status --porcelain -- .github/badges)" ]; then
             echo "no badge change"; exit 0
           fi
           git add .github/badges
