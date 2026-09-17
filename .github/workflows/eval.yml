@@ -60,28 +60,7 @@ jobs:
       - name: Compute eval badge
         if: ${{ github.event_name != 'pull_request' && always() }}
         run: |
-          PYTHONPATH=. python3 - <<'EOF'
-          import json, glob, sys, os
-          files = glob.glob("output-*.json")
-          if not files:
-              sys.exit("no eval output json found")
-          d = json.load(open(max(files, key=os.path.getmtime)))
-          s = d["results"]["stats"]
-          total = s["successes"] + s["failures"] + s["errors"]
-          pct = s["successes"] / total if total else 0
-          color = ("brightgreen" if pct == 1 else
-                   "gold" if pct >= 0.95 else "red")
-          msg = f"{s['successes']}/{total}"
-          badge = {
-              "schemaVersion": 1,
-              "label": "agent evals",
-              "message": msg,
-              "color": color,
-          }
-          os.makedirs(".github/badges", exist_ok=True)
-          with open(".github/badges/eval.json", "w") as fh:
-              json.dump(badge, fh)
-          print(f"badge updated: {msg} ({pct:.0%})")
+          PYTHONPATH=. python3 evals/badge.py
 
       - name: Commit badge to main
         if: ${{ github.ref_name == 'main' && always() }}
